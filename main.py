@@ -65,6 +65,12 @@ def drawCircle(x, y, image, color):
     shift = 0
     cv2.circle(image, center, radius, color, thickness, lineType, shift)
 
+def getPointsArray(x1, y1, x2, y2, distance):
+    points = []
+    for x in range(x1, x2-1):
+        for y in range(y1, y2):
+            points.append([x,y,distance])
+    return points
 
 global clickedList
 global cornersList
@@ -73,6 +79,7 @@ global grayscalePicture
 global colorPicture
 global picHeight
 global picWidth
+import numpy
 
 numPlanes = 0
 clickedList = []
@@ -84,12 +91,26 @@ colorPicture = cv2.imread("assets/project.jpeg", cv2.CV_LOAD_IMAGE_COLOR)
 picHeight= grayscalePicture.shape[0]
 picWidth = grayscalePicture.shape[1]
 
-print "Interface is dumb. After every click, MUST input y (yes) or n (no) or the relevant values in order not to hang the program.\n"
+#print "Interface is dumb. After every click, MUST input y (yes) or n (no) or the relevant values in order not to hang the program.\n"
+#print cornersList
+#print angleList
 
-cv2.namedWindow('Picture', cv2.WINDOW_NORMAL)
-cv2.setMouseCallback('Picture', onMouse, 0)
-cv2.imshow("Picture", colorPicture)
+# Initialise resultant picture to be red
+resultPicture = np.zeros((picHeight, picWidth, 3), np.uint8)
+resultPicture[:] = (0, 0, 255)
+
+# Hardcoded certain point for testing
+pointsMatrix = numpy.float32(getPointsArray(-816,-612,816,612,100))
+# Setting camera parameters
+camera = numpy.matrix([[100.0, 0, 0],[0,100,0],[0,0,1]])
+# Getting projected points, (pointsMatrix, rotation vector, translation vector, camera, coefficients)
+resultPoints = cv2.projectPoints(pointsMatrix, (0,0,0), (0,100,30), camera, 0)
+
+# For each point, check if in bounds and print, else nothing. Note that out of bounds on picture will cause wrap around.
+for x in range(0, len(resultPoints[0])):
+    if resultPoints[0][x][0][1]+612 < picHeight and resultPoints[0][x][0][0]+816 < picWidth and resultPoints[0][x][0][1]+612  > 0 and resultPoints[0][x][0][0]+816 > 0:
+        resultPicture[resultPoints[0][x][0][1]+612][resultPoints[0][x][0][0]+816] = colorPicture[pointsMatrix[x][1]+612,pointsMatrix[x][0]+816]
+
+# Resultant picture
+cv2.imshow("qwe", resultPicture)
 cv2.waitKey()
-
-print cornersList
-print angleList
