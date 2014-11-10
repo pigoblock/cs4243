@@ -268,6 +268,15 @@ def generate3DscenePointsRectangle(face):
 def generate3DscenePointsTriangle():
     print "Generating 3d scene points for triangle"
 
+def colour2Dpoint(point_2d, point_3d):
+    if zBuffer[point_2d[0]][point_2d[1]] == 0 or point_3d[2] > zBuffer[point_2d[0]][point_2d[1]]:
+        resultImg[point_2d[0]][point_2d[1]] = point_3d[3:]
+        zBuffer[point_2d[0]][point_2d[1]] = point_3d[2]
+
+def colourAll2DPoints(arr_2dPts, arr_3dPts):
+    for x in range (0, len(arr_2dPts)):
+        colour2Dpoint(arr_2dPts[x], arr_3dPts[x])
+
 global clickedList
 global cornersList
 global angleList
@@ -288,7 +297,9 @@ grayscalePicture = cv2.imread("assets/project.jpeg", cv2.CV_LOAD_IMAGE_GRAYSCALE
 colorPicture = cv2.imread("assets/project.jpeg", cv2.CV_LOAD_IMAGE_COLOR)
 picHeight= grayscalePicture.shape[0]
 picWidth = grayscalePicture.shape[1]
-
+resultImg = np.zeros((picWidth,picHeight))
+zBuffer = np.zeros((picWidth,picHeight))
+#cv2.imshow("FWE", resultImg)
 print "Interface is dumb. After every click, MUST input y (yes) or n (no) or the relevant values in order not to hang the program.\n"
 print "Click in an clockwise manner, starting from the top left most point."
 cv2.namedWindow('Picture', cv2.WINDOW_NORMAL)
@@ -318,3 +329,4 @@ cv2.imshow("qwe", resultPicture)
 
 cv2.waitKey()
 create3DscenePoints()
+#colourAll2DPoints(<<2D array of points[x,y]>>, <<6D array of 3d points:[x,y,z,r,g,b]>>)
