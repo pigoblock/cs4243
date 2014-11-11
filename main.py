@@ -3,6 +3,7 @@ import cv2
 import cv2.cv as cv
 import numpy as np
 import matplotlib.pyplot as plt
+from cv2 import getPerspectiveTransform, warpPerspective, imshow
 
 global faceList2D
 global faceList3D
@@ -30,15 +31,6 @@ class point2D:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-
-# 3D point class for storing of 3D points. Inherits point2D class
-class point3D(point2D):
-    z = 0
-
-    def __init__(self, x, y, z):
-        self.x = x
-        self.y = y
-        self.z = z
 
 # Mouse click event that stores all values that will be needed for further calculation
 def onMouse(event, x, y, flags, param):
@@ -158,111 +150,113 @@ def generate3DscenePointsRectangle(face):
     if int(face.angleXZ) == 90:
         # point list corresponds to a wall facing the center
         if int(face.angleXY) == 90:
-            point1 = point3D(int(face.pointList[3].x), int(face.pointList[3].y), int(face.distanceFromCamera))
-            point2 = point3D(int(face.pointList[2].x), int(face.pointList[2].y), int(face.distanceFromCamera))
-            point3 = point3D(int(face.pointList[1].x), int(face.pointList[1].y), int(face.distanceFromCamera))
-            point4 = point3D(int(face.pointList[0].x), int(face.pointList[0].y), int(face.distanceFromCamera))
+            point1 = [int(face.pointList[3].x), int(face.pointList[3].y), int(face.distanceFromCamera)]
+            point2 = [int(face.pointList[2].x), int(face.pointList[2].y), int(face.distanceFromCamera)]
+            point3 = [int(face.pointList[1].x), int(face.pointList[1].y), int(face.distanceFromCamera)]
+            point4 = [int(face.pointList[0].x), int(face.pointList[0].y), int(face.distanceFromCamera)]
+
+            '''
+            pixel_colour_1 = baseImage[int(face.pointList[3].y), int(face.pointList[3].x)]
+            pixel_colour_2 = baseImage[int(face.pointList[2].y), int(face.pointList[2].x)]
+            pixel_colour_3 = baseImage[int(face.pointList[1].y), int(face.pointList[1].x)]
+            pixel_colour_4 = baseImage[int(face.pointList[0].y), int(face.pointList[0].x)]
+            '''
 
             # Transforming points to world coordinates
-            point1.x = int((point1.x - center_of_projection_x) * point1.z / focal_length * scale_factor)
-            point1.y = int((point1.y - center_of_projection_y) * point1.z / focal_length * scale_factor)
+            point1[0] = int((point1[0] - center_of_projection_x) * point1[2] / focal_length * scale_factor)
+            point1[1] = int((point1[1] - center_of_projection_y) * point1[2] / focal_length * scale_factor)
 
-            point2.x = int((point2.x - center_of_projection_x) * point2.z / focal_length * scale_factor)
-            point2.y = int((point2.y - center_of_projection_y) * point2.z / focal_length * scale_factor)
+            point2[0] = int((point2[0] - center_of_projection_x) * point2[2] / focal_length * scale_factor)
+            point2[1] = int((point2[1] - center_of_projection_y) * point2[2] / focal_length * scale_factor)
 
-            point3.x = int((point3.x - center_of_projection_x) * point3.z / focal_length * scale_factor)
-            point3.y = int((point3.y - center_of_projection_y) * point3.z / focal_length * scale_factor)
+            point3[0] = int((point3[0] - center_of_projection_x) * point3[2] / focal_length * scale_factor)
+            point3[1] = int((point3[1] - center_of_projection_y) * point3[2] / focal_length * scale_factor)
 
-            point4.x = int((point4.x - center_of_projection_x) * point4.z / focal_length * scale_factor)
-            point4.y = int((point4.y - center_of_projection_y) * point4.z / focal_length * scale_factor)
+            point4[0] = int((point4[0] - center_of_projection_x) * point4[2] / focal_length * scale_factor)
+            point4[1] = int((point4[1] - center_of_projection_y) * point4[2] / focal_length * scale_factor)
 
             # Generating all corner points (assumed width of 100) of left and right face
-            #point5 = point3D(point1.x, point1.y, int(point1.z) + point2.x - point1.x)
-            #point6 = point3D(point2.x, point2.y, int(point2.z) + point2.x - point1.x)
-            point7 = point3D(point3.x, point3.y, int(point3.z) + point2.x - point1.x)
-            point8 = point3D(point4.x, point4.y, int(point4.z) + point2.x - point1.x)
+            point5 = [point1[0], point1[1], point1[2] + point2[0] - point1[0]]
+            point6 = [point2[0], point2[1], point2[2] + point2[0] - point1[0]]
+            point7 = [point3[0], point3[1], point3[2] + point2[0] - point1[0]]
+            point8 = [point4[0], point4[1], point4[2] + point2[0] - point1[0]]
 
             # Generating all possible points
             pointList3D = []
             # Generating all possible points of center face
             print "Generating 3d scene points for middle wall"
-            for i in range(point1.x, point3.x):
-                for j in range(point1.y, point3.y):
-                    pointList3D.append(point3D(i, j, point1.z))
-                    print "Appended point: " + str(pointList3D[len(pointList3D)-1].x) + ", " + str(pointList3D[len(pointList3D)-1].y) + ", " + str(pointList3D[len(pointList3D)-1].z)
+            for i in range(point1[0], point3[0]):
+                for j in range(point1[1], point3[1]):
+                    pointList3D.append([i, j, point1[2]])
+                    print "Appended point: ",
+                    print pointList3D[len(pointList3D)-1]
             faceList3D.append(pointList3D)
             # Generating all possible points of left face
             print "Generating 3d scene points for left wall"
-            for i in range(point1.z, point8.z):
-                for j in range(point1.y, point8.y):
-                    pointList3D.append(point3D(point1.x, j, i))
-                    print "Appended point: " + str(pointList3D[len(pointList3D)-1].x) + ", " + str(pointList3D[len(pointList3D)-1].y) + ", " + str(pointList3D[len(pointList3D)-1].z)
+            for i in range(point1[2], point8[2]):
+                for j in range(point1[1], point8[1]):
+                    pointList3D.append([point1[0], j, i])
+                    print "Appended point: ",
+                    print pointList3D[len(pointList3D)-1]
             faceList3D.append(pointList3D)
             # Generating all possible points of right face
             print "Generating 3d scene points for right wall"
-            for i in range(point2.z, point7.z):
-                for j in range(point2.y, point7.y):
-                    pointList3D.append(point3D(point2.x, j, i))
-                    print "Appended point: " + str(pointList3D[len(pointList3D)-1].x) + ", " + str(pointList3D[len(pointList3D)-1].y) + ", " + str(pointList3D[len(pointList3D)-1].z)
+            for i in range(point2[2], point7[2]):
+                for j in range(point2[1], point7[1]):
+                    pointList3D.append([point2[0], j, i])
+                    print "Appended point: ",
+                    print pointList3D[len(pointList3D)-1]
             faceList3D.append(pointList3D)
 
         # point list corresponds to a wall facing to the right
         if int(face.angleXY) == 0:
             print "Generating 3d scene points for right wall"
             # Getting camera coordinates of points
-            point1 = point3D(int(face.pointList[3].x), int(face.pointList[3].y), int(face.distanceFromCamera))
-            point4 = point3D(int(face.pointList[0].x), int(face.pointList[0].y), int(face.distanceFromCamera))
+            point1 = [int(face.pointList[3].x), int(face.pointList[3].y), int(face.distanceFromCamera)]
+            point4 = [int(face.pointList[0].x), int(face.pointList[0].y), int(face.distanceFromCamera)]
 
             # Transforming points to world coordinates
-            point1.x = int((point1.x - center_of_projection_x) * point1.z / focal_length * scale_factor)
-            point1.y = int((point1.y - center_of_projection_y) * point1.z / focal_length * scale_factor)
+            point1[0] = int((point1[0] - center_of_projection_x) * point1[2] / focal_length * scale_factor)
+            point1[1] = int((point1[1] - center_of_projection_y) * point1[2] / focal_length * scale_factor)
 
-            point4.x = int((point4.x - center_of_projection_x) * point4.z / focal_length * scale_factor)
-            point4.y = int((point4.y - center_of_projection_y) * point4.z / focal_length * scale_factor)
+            point4[0] = int((point4[0] - center_of_projection_x) * point4[2] / focal_length * scale_factor)
+            point4[1] = int((point4[1] - center_of_projection_y) * point4[2] / focal_length * scale_factor)
 
-            point2 = point3D(int(point1.x), int(point1.y), int(point1.z + point4.y - point1.y)) # point2 is behind point1
-            point3 = point3D(int(point4.x), int(point4.y), int(point1.z + point4.y - point1.y)) # point3 is behind point4
-
-            #print "Point 1: (" + str(point1.x) + ", " + str(point1.y) + ", " + str(point1.z) + ")"
-            #print "Point 2: (" + str(point2.x) + ", " + str(point2.y) + ", " + str(point2.z) + ")"
-            #print "Point 3: (" + str(point3.x) + ", " + str(point3.y) + ", " + str(point3.z) + ")"
-            #print "Point 4: (" + str(point4.x) + ", " + str(point4.y) + ", " + str(point4.z) + ")"
+            point2 = [int(point1[0]), int(point1[1]), int(point1[2] + point4[1] - point1[1])] # point2 is behind point1
+            point3 = [int(point4[0]), int(point4[1]), int(point1[2] + point4[1] - point1[1])] # point3 is behind point4
 
             # Generating all possible points
             pointList3D = []
-            for i in range(point1.z, point3.z):
-                for j in range(point1.y, point3.y):
-                    pointList3D.append(point3D(point1.x, j, i))
-                    print "Appended point: " + str(pointList3D[len(pointList3D)-1].x) + ", " + str(pointList3D[len(pointList3D)-1].y) + ", " + str(pointList3D[len(pointList3D)-1].z)
+            for i in range(point1[2], point3[2]):
+                for j in range(point1[1], point3[1]):
+                    pointList3D.append([point1[0], j, i])
+                    print "Appended point: ",
+                    print pointList3D[len(pointList3D)-1]
             faceList3D.append(pointList3D)
 
         # point list corresponds to a wall facing to the left
         if int(face.angleXY) == 180:
             print "Generating 3d scene points for left wall"
-            point2 = point3D(int(face.pointList[2].x), int(face.pointList[2].y), int(face.distanceFromCamera))
-            point3 = point3D(int(face.pointList[1].x), int(face.pointList[1].y), int(face.distanceFromCamera))
+            point2 = [int(face.pointList[2].x), int(face.pointList[2].y), int(face.distanceFromCamera)]
+            point3 = [int(face.pointList[1].x), int(face.pointList[1].y), int(face.distanceFromCamera)]
 
             # Transforming points to world coordinates
-            point2.x = int((point2.x - center_of_projection_x) * point2.z / focal_length * scale_factor)
-            point2.y = int((point2.y - center_of_projection_y) * point2.z / focal_length * scale_factor)
+            point2[0] = int((point2[0] - center_of_projection_x) * point2[2] / focal_length * scale_factor)
+            point2[1] = int((point2[1] - center_of_projection_y) * point2[2] / focal_length * scale_factor)
 
-            point3.x = int((point3.x - center_of_projection_x) * point3.z / focal_length * scale_factor)
-            point3.y = int((point3.y - center_of_projection_y) * point3.z / focal_length * scale_factor)
+            point3[0] = int((point3[0] - center_of_projection_x) * point3[2] / focal_length * scale_factor)
+            point3[1] = int((point3[1] - center_of_projection_y) * point3[2] / focal_length * scale_factor)
 
-            point1 = point3D(int(point2.x), int(point2.y), int(point2.z + point3.y - point2.y)) # point1 is behind point2
-            point4 = point3D(int(point3.x), int(point3.y), int(point2.z + point3.y - point2.y)) # point4 is behind point3
-
-            #print "Point 1: (" + str(point1.x) + ", " + str(point1.y) + ", " + str(point1.z) + ")"
-            #print "Point 2: (" + str(point2.x) + ", " + str(point2.y) + ", " + str(point2.z) + ")"
-            #print "Point 3: (" + str(point3.x) + ", " + str(point3.y) + ", " + str(point3.z) + ")"
-            #print "Point 4: (" + str(point4.x) + ", " + str(point4.y) + ", " + str(point4.z) + ")"
+            point1 = [int(point2[0]), int(point2[1]), int(point2[2] + point3[1] - point2[1])] # point1 is behind point2
+            point4 = [int(point3[0]), int(point3[1]), int(point2[2] + point3[1] - point2[1])] # point4 is behind point3
 
             # Generating all possible points
             pointList3D = []
-            for i in range(point3.z, point1.z):
-                for j in range(point1.y, point3.y):
-                    pointList3D.append(point3D(point1.x, j, i))
-                    print "Appended point: " + str(pointList3D[len(pointList3D)-1].x) + ", " + str(pointList3D[len(pointList3D)-1].y) + ", " + str(pointList3D[len(pointList3D)-1].z)
+            for i in range(point3[2], point1[2]):
+                for j in range(point1[1], point3[1]):
+                    pointList3D.append([point1[0], j, i])
+                    print "Appended point: ",
+                    print pointList3D[len(pointList3D)-1]
             faceList3D.append(pointList3D)
 
 def generate3DscenePointsTriangle():
@@ -294,12 +288,14 @@ cornersList = []
 angleList = []
 
 grayscalePicture = cv2.imread("assets/project.jpeg", cv2.CV_LOAD_IMAGE_GRAYSCALE)
+baseImage = cv2.imread("assets/project.jpeg", cv2.CV_LOAD_IMAGE_COLOR)
 colorPicture = cv2.imread("assets/project.jpeg", cv2.CV_LOAD_IMAGE_COLOR)
 picHeight= grayscalePicture.shape[0]
 picWidth = grayscalePicture.shape[1]
 resultImg = np.zeros((picWidth,picHeight))
 zBuffer = np.zeros((picWidth,picHeight))
 #cv2.imshow("FWE", resultImg)
+
 print "Interface is dumb. After every click, MUST input y (yes) or n (no) or the relevant values in order not to hang the program.\n"
 print "Click in an clockwise manner, starting from the top left most point."
 cv2.namedWindow('Picture', cv2.WINDOW_NORMAL)
@@ -329,4 +325,18 @@ cv2.imshow("qwe", resultPicture)
 
 cv2.waitKey()
 create3DscenePoints()
-#colourAll2DPoints(<<2D array of points[x,y]>>, <<6D array of 3d points:[x,y,z,r,g,b]>>)
+
+'''
+source = np.array([[point1[0],point1[1]],[point2[0],point2[1]],[point3[0],point3[1]],[point4[0],point4[1]]],np.float32)
+source = np.array(source)
+
+destination = np.array([[0,0],[1000,0],[1000,800],[0,800]], np.float32)
+destination = destination.reshape(-2, 1, 2)
+destination = np.matrix(destination)
+
+proj = getPerspectiveTransform(source, destination)
+output = warpPerspective(colorPicture, proj, (1000,1000))
+cv2.imshow("hello?", output)
+if cv2.waitKey(0) == 27:
+    cv2.destroyAllWindows()
+'''
