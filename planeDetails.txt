@@ -1,0 +1,3 @@
+4 front (left pillar of the pagoda in front)
+4 up (ground)
+4 front (tallest tower)
