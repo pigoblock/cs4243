@@ -66,7 +66,7 @@ def getCorners(image):
 
 #Gets 4 projected points of a rectangle in 3D space
 def getProjectedPoints(points_3D, Rvect, Tvect, camera, distVect):
-    resultPoints = cv2.projectPoints(pointsMatrix, (0,0,0), (0,0,0), camera, 0)    
+    resultPoints = cv2.projectPoints(points_3D, Rvect, Tvect, camera, distVect)    
     resultPoints2 = [[resultPoints[0][0][0][0], resultPoints[0][0][0][1]],
                  [resultPoints[0][1][0][0], resultPoints[0][1][0][1]],
                  [resultPoints[0][2][0][0], resultPoints[0][2][0][1]],
@@ -74,9 +74,9 @@ def getProjectedPoints(points_3D, Rvect, Tvect, camera, distVect):
     return resultPoints2
 
 #Points should be in np.array float32 format, Returns the warped picture with black BG on ouputImgSize dimensions
-def warpHomo(imgPts_2D, projPts_2D, outputImgSize):
+def warpHomo(imgPts_2D, projPts_2D, outputImgSize, croppedImg):
     H = findHomography(imgPts_2D, projPts_2D , 0 );
-    resultPicture = warpPerspective(currRectImg, H[0], outputImgSize)
+    resultPicture = warpPerspective(croppedImg, H[0], outputImgSize)
     return resultPicture
 
 array_2d = []
