@@ -26,7 +26,7 @@ def getRMatrix(xDeg, yDeg, zDeg):
     zDeg = toRad(zDeg)
     output = np.array([[math.cos(zDeg)*math.cos(yDeg), math.cos(zDeg)*math.sin(yDeg)*math.sin(xDeg)-math.sin(zDeg)*math.sin(xDeg), math.cos(zDeg)*math.sin(yDeg)*math.cos(xDeg) + math.sin(zDeg)*math.sin(xDeg)],
                       [math.sin(zDeg)*math.cos(yDeg), math.sin(zDeg)*math.sin(yDeg)*math.sin(xDeg)+math.cos(zDeg)*math.cos(xDeg), math.sin(zDeg)*math.sin(yDeg)*math.cos(xDeg) + math.cos(zDeg)*math.sin(xDeg)],
-                      [math.cos(zDeg)*math.cos(yDeg), math.cos(zDeg)*math.sin(yDeg)*math.sin(xDeg)-math.sin(zDeg)*math.sin(xDeg), math.cos(zDeg)*math.sin(yDeg)*math.cos(xDeg) + math.sin(zDeg)*math.sin(xDeg)]])
+                      [-math.sin(yDeg), math.cos(yDeg)*math.sin(xDeg), math.cos(yDeg)*math.cos(xDeg)]])
     return output
 # Initialize arrays given 2 input file obtained using InputInterface.py
 # points.txt will be sliced into 2 arrays: one containing 2d points, and the other containing the corresponding 3d points
