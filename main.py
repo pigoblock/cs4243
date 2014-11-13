@@ -218,12 +218,6 @@ resultPicture[:] = (0, 0, 0)
 initialize()
 processInput()
 
-pointsMatrix = np.float32([array_3d_points_with_color[i][0:3] for i in range(0,len(array_3d_points_with_color))])
-# Setting camera parameters
-camera = np.matrix([[300.0, 0, 767],[0, 300.0, 850],[0, 0, 1]])
-# Getting projected points, (pointsMatrix, rotation vector, translation vector, camera, coefficients)
-resultPoints = cv2.projectPoints(pointsMatrix, (0, 0, 0), (0, 2, 0), camera, 0)
-
 # for all planes, do perspective projection
 for i in range(len(array_planes_with_6d_points)):
 
@@ -232,7 +226,7 @@ for i in range(len(array_planes_with_6d_points)):
     # Setting camera parameters
     camera = np.matrix([[300.0, 0, 767],[0, 300.0, 850],[0, 0, 1]])
     # Getting projected points, (pointsMatrix, rotation vector, translation vector, camera, coefficients)
-    resultPoints = cv2.projectPoints(pointsMatrix, (-0.5,0,0), (0, 2, 0), camera, 0)
+    resultPoints = cv2.projectPoints(pointsMatrix, (-1,0,0), (0, 2, 0), camera, 0)
     #resultPoints = cv2.projectPoints(pointsMatrix, (0, 0, 0), (0, 2, 0), camera, 0)
 
     # For each point, check if in bounds and print, else nothing. Note that out of bounds on picture will cause wrap around.
