@@ -14,6 +14,8 @@ array_plane_direction = []
 array_3d_points_with_color = []
 sceneSize = []
 
+corner_points = []
+
 # Initialize arrays given 2 input file obtained using InputInterface.py
 # points.txt will be sliced into 2 arrays: one containing 2d points, and the other containing the corresponding 3d points
 # planeDetails.txt will be sliced into 2 arrays: one containing number of points in one plane, and the other containing the plane direction
@@ -60,6 +62,9 @@ def processInput():
             # Do something else
             print "yolo!"
 
+resultPicture = np.zeros((1224, 1632, 3), np.uint8)
+resultPicture[:] = (0, 0, 0)
+
 # Given plane details, function will generate all possible 3d points and attach pixel color found through warped transformation
 def generate3DpointsRectangle(numPoints, planeDirection):
 
@@ -68,6 +73,23 @@ def generate3DpointsRectangle(numPoints, planeDirection):
     array_points_3d = array_3d_points_raw[:numPoints]
     del array_2d_points_raw[:numPoints]
     del array_3d_points_raw[:numPoints]
+
+    pointsMatrix = np.float32([array_points_3d])
+    # Setting camera parameters
+    camera = np.matrix([[100.0, 0, 767],[0, 100.0, 811],[0, 0, 1]])
+    # Getting projected points, (pointsMatrix, rotation vector, translation vector, camera, coefficients)
+    resultPoints = cv2.projectPoints(pointsMatrix, (0, 0, 0), (0, 5, 0), camera, 0)
+    point1 = resultPoints[0][0][0]
+    point2 = resultPoints[0][1][0]
+    point3 = resultPoints[0][2][0]
+    point4 = resultPoints[0][3][0]
+    corner_points.append(resultPoints[0][0][0])
+    corner_points.append(resultPoints[0][1][0])
+    corner_points.append(resultPoints[0][2][0])
+    corner_points.append(resultPoints[0][3][0])
+    polygon = np.array([point1, point2, point3, point4 ], np.int32)
+    cv2.fillConvexPoly(resultPicture, polygon, [255,255,255])
+    cv2.imwrite("test.jpg", resultPicture)
 
     scene_width, scene_height = getSceneSize(array_points_3d, planeDirection)
 
@@ -94,6 +116,7 @@ def generate3DpointsRectangle(numPoints, planeDirection):
                 # point 1 = output[j][i]
                 pixel_color = output[j][i]
                 array_3d_points_with_color.append([point1[0] + i, point1[1] + j, point1[2], pixel_color[0], pixel_color[1], pixel_color[2]])
+
             if planeDirection == 'left':
                 point1 = array_points_3d[0]
                 # point 1 = top left corner of plane
@@ -225,9 +248,6 @@ zBuffer = np.zeros((picWidth,picHeight))
 initialize()
 processInput()
 
-'''
-create3DscenePoints()
-'''
 # Initialise resultant picture to be red
 resultPicture = np.zeros((picHeight, picWidth, 3), np.uint8)
 resultPicture[:] = (0, 0, 0)
@@ -236,9 +256,9 @@ resultPicture[:] = (0, 0, 0)
 #pointsMatrix = np.float32(getPointsArray(-816,-612,816,612,100))
 pointsMatrix = np.float32([array_3d_points_with_color[i][0:3] for i in range(0,len(array_3d_points_with_color))])
 # Setting camera parameters
-camera = np.matrix([[1.0, 0, 770],[0, 1.0, 860],[0, 0, 1]])
+camera = np.matrix([[100.0, 0, 767],[0, 100.0, 811],[0, 0, 1]])
 # Getting projected points, (pointsMatrix, rotation vector, translation vector, camera, coefficients)
-resultPoints = cv2.projectPoints(pointsMatrix, (0, 0, 0), (0, 0, 0), camera, 0)
+resultPoints = cv2.projectPoints(pointsMatrix, (0, 0, 0), (0, 5, 0), camera, 0)
 
 topLeftX = 0
 topLeftY = 0
@@ -258,6 +278,7 @@ for x in range(0, len(resultPoints[0])):
         #resultPicture[j][i] = colorPicture[pointsMatrix[x][1],pointsMatrix[x][0]]
         resultPicture[j][i] = [array_3d_points_with_color[x][3], array_3d_points_with_color[x][4], array_3d_points_with_color[x][5]]
 
+
 '''
 print resultPoints[0]
 # For each point, check if in bounds and print, else nothing. Note that out of bounds on picture will cause wrap around.
@@ -267,6 +288,7 @@ for x in range(0, len(resultPoints[0])):
     if resultPoints[0][x][0][1]+612 < picHeight and resultPoints[0][x][0][0]+816 < picWidth and resultPoints[0][x][0][1]+612  > 0 and resultPoints[0][x][0][0]+816 > 0:
         resultPicture[resultPoints[0][x][0][1]+612][resultPoints[0][x][0][0]+816] = colorPicture[pointsMatrix[x][1]+612,pointsMatrix[x][0]+816]
 '''
+
 # Resultant picture
 cv2.imshow("qwe", resultPicture)
 cv2.imwrite("result.jpg", resultPicture);
