@@ -53,23 +53,34 @@ if cv2.waitKey(0) == 27:
     cv2.destroyAllWindows()
 '''
 
-image = cv2.imread("assets/project.jpeg", cv2.CV_LOAD_IMAGE_COLOR)
+image = cv2.imread("project.jpeg", cv2.CV_LOAD_IMAGE_COLOR)
 
 array_2d = []
-point_2d_1 = [1175.0, 699]
-point_2d_2 = [1240.0, 682]
-point_2d_3 = [1240.0, 888]
-point_2d_4 = [1175.0, 875]
+currRectImg = image[812:856, 848:960]
+point_2d_1 = [0, 0]
+point_2d_2 = [44, 0]
+point_2d_3 = [44, 112]
+point_2d_4 = [0, 112]
 array_2d.append(point_2d_1)
 array_2d.append(point_2d_2)
 array_2d.append(point_2d_3)
 array_2d.append(point_2d_4)
-'''
+
 array_3d = []
+'''
 point_3d_1 = [50.0, -30, 40]
 point_3d_2 = [50.0, -30, 30]
 point_3d_3 = [50.0, 0, 30]
 point_3d_4 = [50.0, 0, 40]
+'''
+picHeight= image.shape[0]
+picWidth = image.shape[1]
+
+point_3d_1 = [30.0, -20, 100]
+point_3d_2 = [60.0, -20, 100]
+point_3d_3 = [60.0, 0, 100]
+point_3d_4 = [30.0, 0, 100]
+
 array_3d.append(point_3d_1)
 array_3d.append(point_3d_2)
 array_3d.append(point_3d_3)
@@ -77,27 +88,32 @@ array_3d.append(point_3d_4)
 
 pointsMatrix = np.float32([array_3d])
 
-camera = np.matrix([[300.0, 0, 767],[0, 300.0, 850],[0, 0, 1]])
-resultPoints = cv2.projectPoints(pointsMatrix, (0,0,0), (0,2,0), camera, 0)
+camera = np.matrix([[300.0, 0, picHeight/2],[0, 300.0, picWidth/2],[0, 0, 1]])
+resultPoints = cv2.projectPoints(pointsMatrix, (0,0,0), (0,0,0), camera, 0)
 
 resultPoints2 = [[int(resultPoints[0][0][0][0]), int(resultPoints[0][0][0][1])],
                  [int(resultPoints[0][1][0][0]), int(resultPoints[0][1][0][1])],
                  [int(resultPoints[0][2][0][0]), int(resultPoints[0][2][0][1])],
                  [int(resultPoints[0][3][0][0]), int(resultPoints[0][3][0][1])]
                  ]
-
-print resultPoints2
 '''
-resultPoints2 = [[0,0],
-                 [100,0],
-                 [100,100],
-                 [0,100]]
+resultPoints2 = [[int(picHeight - (picHeight - resultPoints[0][0][0][1])), int(picWidth - (picWidth - resultPoints[0][0][0][0]))],
+                 [int(picHeight - (picHeight - resultPoints[0][1][0][1])), int(picWidth - (picWidth - resultPoints[0][1][0][0]))],
+                 [int(picHeight - (picHeight - resultPoints[0][2][0][1])), int(picWidth - (picWidth - resultPoints[0][2][0][0]))],
+                 [int(picHeight - (picHeight - resultPoints[0][3][0][1])), int(picWidth - (picWidth - resultPoints[0][3][0][0]))]]
+'''
+print pointsMatrix
+print resultPoints[0]
+
+#resultPoints2 = [[0,0],
+#                 [100,0],
+#                 [100,100],
+#                 [0,100]]
 
 H = findHomography(np.array(array_2d, np.float32), np.array(resultPoints2, np.float32) , 0 );
 
-picHeight= image.shape[0]
-picWidth = image.shape[1]
 
-image = warpPerspective(np.array(array_2d, np.float32), H[0], (picWidth, picHeight))
 
-cv2.imwrite("YESSSSSS.jpg", image)
+resultPicture = warpPerspective(currRectImg, H[0], (picHeight,picWidth))
+
+cv2.imwrite("YESSSSSS.jpg", resultPicture)
