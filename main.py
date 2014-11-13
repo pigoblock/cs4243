@@ -3,6 +3,7 @@ import cv2.cv as cv
 import numpy as np
 import matplotlib.pyplot as plt
 from cv2 import getPerspectiveTransform, warpPerspective, imshow
+import math
 
 # Data structures used for initializing
 img = cv2.imread("assets/project.jpeg", cv2.CV_LOAD_IMAGE_COLOR)
@@ -16,6 +17,17 @@ sceneSize = []
 
 corner_points = []
 
+def toRad(degree):
+    return degree*math.pi/180
+
+def getRMatrix(xDeg, yDeg, zDeg):
+    xDeg = toRad(xDeg)
+    yDeg = toRad(yDeg)
+    zDeg = toRad(zDeg)
+    output = np.array([[math.cos(zDeg)*math.cos(yDeg), math.cos(zDeg)*math.sin(yDeg)*math.sin(xDeg)-math.sin(zDeg)*math.sin(xDeg), math.cos(zDeg)*math.sin(yDeg)*math.cos(xDeg) + math.sin(zDeg)*math.sin(xDeg)],
+                      [math.sin(zDeg)*math.cos(yDeg), math.sin(zDeg)*math.sin(yDeg)*math.sin(xDeg)+math.cos(zDeg)*math.cos(xDeg), math.sin(zDeg)*math.sin(yDeg)*math.cos(xDeg) + math.cos(zDeg)*math.sin(xDeg)],
+                      [math.cos(zDeg)*math.cos(yDeg), math.cos(zDeg)*math.sin(yDeg)*math.sin(xDeg)-math.sin(zDeg)*math.sin(xDeg), math.cos(zDeg)*math.sin(yDeg)*math.cos(xDeg) + math.sin(zDeg)*math.sin(xDeg)]])
+    return output
 # Initialize arrays given 2 input file obtained using InputInterface.py
 # points.txt will be sliced into 2 arrays: one containing 2d points, and the other containing the corresponding 3d points
 # planeDetails.txt will be sliced into 2 arrays: one containing number of points in one plane, and the other containing the plane direction
