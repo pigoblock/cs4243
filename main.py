@@ -240,12 +240,23 @@ camera = np.matrix([[1.0, 0, 770],[0, 1.0, 860],[0, 0, 1]])
 # Getting projected points, (pointsMatrix, rotation vector, translation vector, camera, coefficients)
 resultPoints = cv2.projectPoints(pointsMatrix, (0, 0, 0), (0, 0, 0), camera, 0)
 
+topLeftX = 0
+topLeftY = 0
+topRightX = 0
+topRightY = 0
+bottomLeftX = 0
+bottomLeftY = 0
+bottomRightX = 0
+bottomRightY = 0
+
 # For each point, check if in bounds and print, else nothing. Note that out of bounds on picture will cause wrap around.
 for x in range(0, len(resultPoints[0])):
     print str(x) + "/" + str(len(resultPoints[0]))
-    if resultPoints[0][x][0][1] < picHeight and resultPoints[0][x][0][0] < picWidth and resultPoints[0][x][0][1]  > 0 and resultPoints[0][x][0][0] > 0:
-        #resultPicture[resultPoints[0][x][0][1]][resultPoints[0][x][0][0]] = colorPicture[pointsMatrix[x][1],pointsMatrix[x][0]]
-        resultPicture[int(resultPoints[0][x][0][1])][int(resultPoints[0][x][0][0])] = [array_3d_points_with_color[x][3], array_3d_points_with_color[x][4], array_3d_points_with_color[x][5]]
+        i = int(resultPoints[0][x][0][0])
+        j = int(resultPoints[0][x][0][1])   
+    if j < picHeight and i < picWidth and j  > 0 and i > 0:
+        #resultPicture[j][i] = colorPicture[pointsMatrix[x][1],pointsMatrix[x][0]]
+        resultPicture[j][i] = [array_3d_points_with_color[x][3], array_3d_points_with_color[x][4], array_3d_points_with_color[x][5]]
 
 '''
 print resultPoints[0]
