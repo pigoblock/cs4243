@@ -5,54 +5,26 @@ import cv2
 import cv2.cv as cv
 from cv2 import getPerspectiveTransform, warpPerspective, imshow, findHomography
 
-'''
-x_screen = 705
-y_screen = 785
-focal_length = 10.0
-center_of_projection_x = 816.0
-center_of_projection_y = 612.0
-distance_from_camera = 100.0
-scale_factor = 1
+def overlayImage(resultImage, homoImage):
+    greyHomo = cv2.cvtColor(homoImage, cv2.cv.CV_BGR2GRAY)
+    retVal, greyHomo = cv2.threshold(greyHomo, 0,255,cv2.cv.CV_THRESH_BINARY)
+    greyHomo_inv = ~greyHomo
+    
+    newResultImage = np.zeros((picHeight, picWidth, 3), np.uint8)
+    newResultImage[:] = (0, 0, 0)
+    newHomoImage = np.zeros((picHeight, picWidth, 3), np.uint8)
+    newHomoImage[:] = (0, 0, 0)
+    
+    cv2.bitwise_and(resultImage, resultImage, newResultImage,greyHomo_inv)
+    cv2.bitwise_and(homoImage, homoImage, newHomoImage,greyHomo)
 
-x_world = int((x_screen - center_of_projection_x) * distance_from_camera / focal_length * scale_factor)
-y_world = int((y_screen - center_of_projection_y) * distance_from_camera / focal_length * scale_factor)
-z_world = distance_from_camera
-
-print x_world,
-print y_world,
-print z_world
-
-x_screen = (x_world / z_world * focal_length / scale_factor) + center_of_projection_x
-y_screen = (y_world / z_world * focal_length / scale_factor) + center_of_projection_y
-
-print x_screen,
-print y_screen
-
-array = [ [1,2,3,4,5,6],
-          [6,5,4,3,2,1],
-          [5,10,15,2,1,3],
-          [2,2,2,2,2,2]]
-array = [array[i][0:3] for i in range(0,len(array))]
-print array
-
-img = cv2.imread("assets/project.jpeg", cv2.CV_LOAD_IMAGE_COLOR)
-#source = np.array([[705, 780],[835, 780],[835, 855],[705, 855]],np.float32)
-source = np.array([[1175, 700],[1235, 675],[1235, 885],[1175, 875]],np.float32)
-
-destination = np.array([[0,0],[1000,0],[1000,500],[0,500]], np.float32)
-destination = destination.reshape(-2, 1, 2)
-destination = np.matrix(destination)
-
-proj = getPerspectiveTransform(source, destination)
-output = warpPerspective(img, proj, (1000, 500))
-
-cv2.imwrite('skewedOutput.jpg', output)
-
-cv2.imshow("hello?", output)
-if cv2.waitKey(0) == 27:
-    cv2.destroyAllWindows()
-'''
-
+    
+    resultImage = newResultImage + newHomoImage
+    cv2.imwrite("NOOO2.jpg", resultPicture)
+    cv2.imwrite("YESSSSSS2.jpg", resultImage)
+    return resultImage
+    
+    
 image = cv2.imread("project.jpeg", cv2.CV_LOAD_IMAGE_COLOR)
 
 #Gets image pixels from xStart to xEnd -1, yStart to yEnd - 1
@@ -139,5 +111,5 @@ H = findHomography(np.array(array_2d, np.float32), np.array(resultPoints2, np.fl
 
 
 resultPicture = warpPerspective(currRectImg, H[0], (picWidth,picHeight))
-
-cv2.imwrite("YESSSSSS.jpg", resultPicture)
+overlayImage(image, resultPicture)
+finalPicture = resultPicture + image
