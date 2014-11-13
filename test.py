@@ -55,6 +55,30 @@ if cv2.waitKey(0) == 27:
 
 image = cv2.imread("project.jpeg", cv2.CV_LOAD_IMAGE_COLOR)
 
+#Gets image pixels from xStart to xEnd -1, yStart to yEnd - 1
+def cropImage(image, xStart, xEnd, yStart, yEnd):
+    cropped = image[yStart:yEnd, xStart:xEnd]
+    return cropped
+
+#Gets Corners of 2D image in clockwise direction
+def getCorners(image):
+    return [[0,0],[len(image[0]), 0], [len(image[0]), len(image)], [0, len(image)]]
+
+#Gets 4 projected points of a rectangle in 3D space
+def getProjectedPoints(points_3D, Rvect, Tvect, camera, distVect):
+    resultPoints = cv2.projectPoints(pointsMatrix, (0,0,0), (0,0,0), camera, 0)    
+    resultPoints2 = [[resultPoints[0][0][0][0], resultPoints[0][0][0][1]],
+                 [resultPoints[0][1][0][0], resultPoints[0][1][0][1]],
+                 [resultPoints[0][2][0][0], resultPoints[0][2][0][1]],
+                 [resultPoints[0][3][0][0], resultPoints[0][3][0][1]]]
+    return resultPoints2
+
+#Points should be in np.array float32 format, Returns the warped picture with black BG on ouputImgSize dimensions
+def warpHomo(imgPts_2D, projPts_2D, outputImgSize):
+    H = findHomography(imgPts_2D, projPts_2D , 0 );
+    resultPicture = warpPerspective(currRectImg, H[0], outputImgSize)
+    return resultPicture
+
 array_2d = []
 currRectImg = image[812:856, 848:960]
 point_2d_1 = [0, 0]
@@ -91,10 +115,10 @@ pointsMatrix = np.float32([array_3d])
 camera = np.matrix([[300.0, 0, picWidth/2],[0, 300.0, picHeight/2],[0, 0, 1]])
 resultPoints = cv2.projectPoints(pointsMatrix, (0,0,0), (0,0,0), camera, 0)
 
-resultPoints2 = [[int(resultPoints[0][0][0][0]), int(resultPoints[0][0][0][1])],
-                 [int(resultPoints[0][1][0][0]), int(resultPoints[0][1][0][1])],
-                 [int(resultPoints[0][2][0][0]), int(resultPoints[0][2][0][1])],
-                 [int(resultPoints[0][3][0][0]), int(resultPoints[0][3][0][1])]
+resultPoints2 = [[resultPoints[0][0][0][0], resultPoints[0][0][0][1]],
+                 [resultPoints[0][1][0][0], resultPoints[0][1][0][1]],
+                 [resultPoints[0][2][0][0], resultPoints[0][2][0][1]],
+                 [resultPoints[0][3][0][0], resultPoints[0][3][0][1]]
                  ]
 '''
 resultPoints2 = [[int(picHeight - (picHeight - resultPoints[0][0][0][1])), int(picWidth - (picWidth - resultPoints[0][0][0][0]))],
