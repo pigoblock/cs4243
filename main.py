@@ -71,9 +71,11 @@ def generate3DpointsRectangle(numPoints, planeDirection):
     del array_2d_points_raw[:numPoints]
     del array_3d_points_raw[:numPoints]
 
+    # Painting with rectangles
     pointsMatrix = np.float32([array_points_3d])
     camera = np.matrix([[300.0, 0, 767],[0, 300.0, 850],[0, 0, 1]])
     resultPoints = cv2.projectPoints(pointsMatrix, (0, 0, 0), (0, 2, 0), camera, 0)
+    '''
     point1 = resultPoints[0][0][0]
     point2 = resultPoints[0][1][0]
     point3 = resultPoints[0][2][0]
@@ -83,14 +85,14 @@ def generate3DpointsRectangle(numPoints, planeDirection):
     corner_points.append(resultPoints[0][2][0])
     corner_points.append(resultPoints[0][3][0])
     polygon = np.array([point1, point2, point3, point4 ], np.int32)
-    if planeDirection != 'up':
-        cv2.fillConvexPoly(resultPicture, polygon, [255,255,255])
-    else :
+    if planeDirection == 'up':
         cv2.fillConvexPoly(resultPicture, polygon, [39,92,66])
-    cv2.imwrite("test.jpg", resultPicture)
-
+    else:
+        cv2.fillConvexPoly(resultPicture, polygon, [141,175,204])
+    '''
     scene_width, scene_height = getSceneSize(array_points_3d, planeDirection)
-
+    scene_width *= 20
+    scene_height *= 20
     # Obtain a warped transformation of 2d image into size of 3d image
     source = np.array(array_points_2d, np.float32)
 
@@ -108,49 +110,25 @@ def generate3DpointsRectangle(numPoints, planeDirection):
             # Assign pixel color of warped transformation to 3d point
             if planeDirection == 'front':
                 point1 = array_points_3d[0]
+                pixel_color = output[j][i]
                 # point 1 = top left corner of plane
                 # point 1 add scene width in the x direction
                 # point 1 add scene height in the y direction
-                # point 1 = output[j][i]
-                pixel_color = output[j][i]
-                for dy in range(3):
-                    dy = 0.1 * dy
-                    array_3d_points_with_color.append([point1[0] + i + dy, point1[1] + j +0.0, point1[2], pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0] + i + dy, point1[1] + j +0.1, point1[2], pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0] + i + dy, point1[1] + j +0.2, point1[2], pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0] + i + dy, point1[1] + j +0.3, point1[2], pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0] + i + dy, point1[1] + j +0.4, point1[2], pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0] + i + dy, point1[1] + j +0.5, point1[2], pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0] + i + dy, point1[1] + j +0.6, point1[2], pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0] + i + dy, point1[1] + j +0.7, point1[2], pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0] + i + dy, point1[1] + j +0.8, point1[2], pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0] + i + dy, point1[1] + j +0.9, point1[2], pixel_color[0], pixel_color[1], pixel_color[2]])
+                array_3d_points_with_color.append([point1[0] + (i/20.0), point1[1] + (j/20.0), point1[2], pixel_color[0], pixel_color[1], pixel_color[2]])
 
             if planeDirection == 'left':
                 point1 = array_points_3d[0]
+                pixel_color = output[j][i]
                 # point 1 = top left corner of plane
                 # point 1 add scene width in the z direction
                 # point 1 add scene height in the y direction
-                # point 1 = output[j][i]
-                pixel_color = output[j][i]
-                for dy in range(3):
-                    dy = 0.1 * dy
-                    array_3d_points_with_color.append([point1[0], point1[1] + j + dy, point1[2] - i, pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0], point1[1] + j + dy, point1[2] - i - 0.1, pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0], point1[1] + j + dy, point1[2] - i - 0.2, pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0], point1[1] + j + dy, point1[2] - i - 0.3, pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0], point1[1] + j + dy, point1[2] - i - 0.4, pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0], point1[1] + j + dy, point1[2] - i - 0.5, pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0], point1[1] + j + dy, point1[2] - i - 0.6, pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0], point1[1] + j + dy, point1[2] - i - 0.7, pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0], point1[1] + j + dy, point1[2] - i - 0.8, pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0], point1[1] + j + dy, point1[2] - i - 0.9, pixel_color[0], pixel_color[1], pixel_color[2]])
-                print "Appended point: " + str(array_3d_points_with_color[len(array_3d_points_with_color)-1])
+                array_3d_points_with_color.append([point1[0], point1[1] + (j/20.0), point1[2] - (i/20.0), pixel_color[0], pixel_color[1], pixel_color[2]])
+                #print "Appended point: " + str(array_3d_points_with_color[len(array_3d_points_with_color)-1])
+                '''
             if planeDirection == 'right':
                 # point 1 = top left corner of plane
                 # point 1 add scene width in the -z direction
                 # point 1 add scene height in the y direction
-                # point 1 = output[j][i]
                 pixel_color = output[j][i]
                 array_3d_points_with_color.append([1,2,3,4,5,6])
             if planeDirection == 'up':
@@ -158,29 +136,20 @@ def generate3DpointsRectangle(numPoints, planeDirection):
                 # point 1 = top left corner of plane
                 # point 1 add scene width in the x direction
                 # point 1 add scene height in the -z direction
-                # point 1 = output[j][i]
                 pixel_color = output[j][i]
-                for dy in range(3):
-                    dy = 0.1 * dy
-                    array_3d_points_with_color.append([point1[0] + i + dy, point1[1], point1[2] - j - 0.0, pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0] + i + dy, point1[1], point1[2] - j - 0.1, pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0] + i + dy, point1[1], point1[2] - j - 0.2, pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0] + i + dy, point1[1], point1[2] - j - 0.3, pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0] + i + dy, point1[1], point1[2] - j - 0.4, pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0] + i + dy, point1[1], point1[2] - j - 0.5, pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0] + i + dy, point1[1], point1[2] - j - 0.6, pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0] + i + dy, point1[1], point1[2] - j - 0.7, pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0] + i + dy, point1[1], point1[2] - j - 0.8, pixel_color[0], pixel_color[1], pixel_color[2]])
-                    array_3d_points_with_color.append([point1[0] + i + dy, point1[1], point1[2] - j - 0.9, pixel_color[0], pixel_color[1], pixel_color[2]])
-                #print "Appended point: " + str(array_3d_points_with_color[len(array_3d_points_with_color)-1])
+                for m in range(10):
+                    dx = 0.1 * m
+                    for n in range(10):
+                        dz = 0.1 * n
+                        array_3d_points_with_color.append([point1[0] + i + dx, point1[1], point1[2] - j - dz, pixel_color[0], pixel_color[1], pixel_color[2]])
+                        #print "Appended point: " + str(array_3d_points_with_color[len(array_3d_points_with_color)-1])
             if planeDirection == 'down':
                 # point 1 = top left corner of plane
                 # point 1 add scene width in the x direction
                 # point 1 add scene height in the z direction
-                # point 1 = output[j][i]
                 pixel_color = output[j][i]
                 array_3d_points_with_color.append([1,2,3,4,5,6])
-
+    '''
     # Generate side walls
 
 # Given 4 points and where the plane is facing, function returns plane width and height
@@ -217,7 +186,6 @@ def getSceneSize(points, planeDirection):
         sceneHeight = abs(points[2][2] - points[0][2])
         return sceneWidth, sceneHeight
 
-
 def colour2Dpoint(point_2d, point_3d):
     if zBuffer[point_2d[0]][point_2d[1]] == 0 or point_3d[2] > zBuffer[point_2d[0]][point_2d[1]]:
         resultImg[point_2d[0]][point_2d[1]] = point_3d[3:]
@@ -227,27 +195,10 @@ def colourAll2DPoints(arr_2dPts, arr_3dPts):
     for x in range (0, len(arr_2dPts)):
         colour2Dpoint(arr_2dPts[x], arr_3dPts[x])
 
-def rotateImage(image, angle):
-    image_center = tuple(np.array(image.shape)/2)
-    rot_mat = cv2.getRotationMatrix2D(image_center,angle, 1)
-    result = cv2.warpAffine(image, rot_mat, image.shape,flags=cv2.INTER_LINEAR)
-    return result
-
-global clickedList
-global cornersList
-global angleList
 global grayscalePicture
 global colorPicture
 global picHeight
 global picWidth
-
-global tempList
-tempList = []
-
-numPlanes = 0
-clickedList = []
-cornersList = []
-angleList = []
 
 grayscalePicture = cv2.imread("assets/project.jpeg", cv2.CV_LOAD_IMAGE_GRAYSCALE)
 baseImage = cv2.imread("assets/project.jpeg", cv2.CV_LOAD_IMAGE_COLOR)
@@ -278,20 +229,7 @@ for x in range(0, len(resultPoints[0])):
     if resultPoints[0][x][0][1] < picHeight and resultPoints[0][x][0][0] < picWidth and resultPoints[0][x][0][1]  > 0 and resultPoints[0][x][0][0] > 0:
         #resultPicture[resultPoints[0][x][0][1]][resultPoints[0][x][0][0]] = colorPicture[pointsMatrix[x][1],pointsMatrix[x][0]]
         resultPicture[int(resultPoints[0][x][0][1])][int(resultPoints[0][x][0][0])] = [array_3d_points_with_color[x][3], array_3d_points_with_color[x][4], array_3d_points_with_color[x][5]]
-'''
-print resultPoints[0]
-# For each point, check if in bounds and print, else nothing. Note that out of bounds on picture will cause wrap around.
-for x in range(0, len(resultPoints[0])):
-    print str(x) + "/" + str(len(resultPoints[0])),
-    print resultPoints
-    if resultPoints[0][x][0][1]+612 < picHeight and resultPoints[0][x][0][0]+816 < picWidth and resultPoints[0][x][0][1]+612  > 0 and resultPoints[0][x][0][0]+816 > 0:
-        resultPicture[resultPoints[0][x][0][1]+612][resultPoints[0][x][0][0]+816] = colorPicture[pointsMatrix[x][1]+612,pointsMatrix[x][0]+816]
-'''
 
 # Resultant picture
 cv2.imshow("qwe", resultPicture)
 cv2.imwrite("result.jpg", resultPicture);
-'''
-if cv2.waitKey(0) == 27:
-    cv2.destroyAllWindows()
-'''
