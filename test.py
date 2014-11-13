@@ -58,9 +58,9 @@ image = cv2.imread("project.jpeg", cv2.CV_LOAD_IMAGE_COLOR)
 array_2d = []
 currRectImg = image[812:856, 848:960]
 point_2d_1 = [0, 0]
-point_2d_2 = [44, 0]
-point_2d_3 = [44, 112]
-point_2d_4 = [0, 112]
+point_2d_2 = [112, 0]
+point_2d_3 = [112, 44]
+point_2d_4 = [0, 44]
 array_2d.append(point_2d_1)
 array_2d.append(point_2d_2)
 array_2d.append(point_2d_3)
@@ -76,10 +76,10 @@ point_3d_4 = [50.0, 0, 40]
 picHeight= image.shape[0]
 picWidth = image.shape[1]
 
-point_3d_1 = [30.0, -20, 100]
-point_3d_2 = [60.0, -20, 100]
-point_3d_3 = [60.0, 0, 100]
-point_3d_4 = [30.0, 0, 100]
+point_3d_1 = [30.0, -60, 10]
+point_3d_2 = [30.0, -60, 100]
+point_3d_3 = [30.0, 0, 100]
+point_3d_4 = [30.0, 0, 10]
 
 array_3d.append(point_3d_1)
 array_3d.append(point_3d_2)
@@ -88,7 +88,7 @@ array_3d.append(point_3d_4)
 
 pointsMatrix = np.float32([array_3d])
 
-camera = np.matrix([[300.0, 0, picHeight/2],[0, 300.0, picWidth/2],[0, 0, 1]])
+camera = np.matrix([[300.0, 0, picWidth/2],[0, 300.0, picHeight/2],[0, 0, 1]])
 resultPoints = cv2.projectPoints(pointsMatrix, (0,0,0), (0,0,0), camera, 0)
 
 resultPoints2 = [[int(resultPoints[0][0][0][0]), int(resultPoints[0][0][0][1])],
@@ -114,6 +114,6 @@ H = findHomography(np.array(array_2d, np.float32), np.array(resultPoints2, np.fl
 
 
 
-resultPicture = warpPerspective(currRectImg, H[0], (picHeight,picWidth))
+resultPicture = warpPerspective(currRectImg, H[0], (picWidth,picHeight))
 
 cv2.imwrite("YESSSSSS.jpg", resultPicture)
