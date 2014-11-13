@@ -12,22 +12,11 @@ array_3d_points_raw = []
 array_points_per_plane = []
 array_plane_direction = []
 # Data structures obtained after processing (used for the rest of the whole project)
-array_3d_points_with_color = []
+#array_3d_points_with_color = []
 sceneSize = []
-
+array_planes_with_6d_points = []
 corner_points = []
 
-def toRad(degree):
-    return degree*math.pi/180
-
-def getRMatrix(xDeg, yDeg, zDeg):
-    xDeg = toRad(xDeg)
-    yDeg = toRad(yDeg)
-    zDeg = toRad(zDeg)
-    output = np.array([[math.cos(zDeg)*math.cos(yDeg), math.cos(zDeg)*math.sin(yDeg)*math.sin(xDeg)-math.sin(zDeg)*math.cos(xDeg), math.cos(zDeg)*math.sin(yDeg)*math.cos(xDeg) + math.sin(zDeg)*math.sin(xDeg)],
-                      [math.sin(zDeg)*math.cos(yDeg), math.sin(zDeg)*math.sin(yDeg)*math.sin(xDeg)+math.cos(zDeg)*math.cos(xDeg), math.sin(zDeg)*math.sin(yDeg)*math.cos(xDeg) - math.cos(zDeg)*math.sin(xDeg)],
-                      [-math.sin(yDeg), math.cos(yDeg)*math.sin(xDeg), math.cos(yDeg)*math.cos(xDeg)]])
-    return output
 # Initialize arrays given 2 input file obtained using InputInterface.py
 # points.txt will be sliced into 2 arrays: one containing 2d points, and the other containing the corresponding 3d points
 # planeDetails.txt will be sliced into 2 arrays: one containing number of points in one plane, and the other containing the plane direction
@@ -78,16 +67,16 @@ def processInput():
 def generate3DpointsRectangle(numPoints, planeDirection):
 
     print "Generating 3d points for rectangle ... "
+    array_3d_points_with_color = []
     array_points_2d = array_2d_points_raw[:numPoints]
     array_points_3d = array_3d_points_raw[:numPoints]
     del array_2d_points_raw[:numPoints]
     del array_3d_points_raw[:numPoints]
-
+    '''
     # Painting with rectangles
     pointsMatrix = np.float32([array_points_3d])
     camera = np.matrix([[300.0, 0, 767],[0, 300.0, 850],[0, 0, 1]])
     resultPoints = cv2.projectPoints(pointsMatrix, (0, 0, 0), (0, 2, 0), camera, 0)
-    '''
     point1 = resultPoints[0][0][0]
     point2 = resultPoints[0][1][0]
     point3 = resultPoints[0][2][0]
@@ -127,7 +116,6 @@ def generate3DpointsRectangle(numPoints, planeDirection):
                 # point 1 add scene width in the x direction
                 # point 1 add scene height in the y direction
                 array_3d_points_with_color.append([point1[0] + (i/20.0), point1[1] + (j/20.0), point1[2], pixel_color[0], pixel_color[1], pixel_color[2]])
-
             if planeDirection == 'left':
                 point1 = array_points_3d[0]
                 pixel_color = output[j][i]
@@ -136,7 +124,6 @@ def generate3DpointsRectangle(numPoints, planeDirection):
                 # point 1 add scene height in the y direction
                 array_3d_points_with_color.append([point1[0], point1[1] + (j/20.0), point1[2] - (i/20.0), pixel_color[0], pixel_color[1], pixel_color[2]])
                 #print "Appended point: " + str(array_3d_points_with_color[len(array_3d_points_with_color)-1])
-                '''
             if planeDirection == 'right':
                 # point 1 = top left corner of plane
                 # point 1 add scene width in the -z direction
@@ -149,19 +136,15 @@ def generate3DpointsRectangle(numPoints, planeDirection):
                 # point 1 add scene width in the x direction
                 # point 1 add scene height in the -z direction
                 pixel_color = output[j][i]
-                for m in range(10):
-                    dx = 0.1 * m
-                    for n in range(10):
-                        dz = 0.1 * n
-                        array_3d_points_with_color.append([point1[0] + i + dx, point1[1], point1[2] - j - dz, pixel_color[0], pixel_color[1], pixel_color[2]])
-                        #print "Appended point: " + str(array_3d_points_with_color[len(array_3d_points_with_color)-1])
+                array_3d_points_with_color.append([point1[0] + (i/20.0), point1[1], point1[2] - (j/20.0), pixel_color[0], pixel_color[1], pixel_color[2]])
+                #print "Appended point: " + str(array_3d_points_with_color[len(array_3d_points_with_color)-1])
             if planeDirection == 'down':
                 # point 1 = top left corner of plane
                 # point 1 add scene width in the x direction
                 # point 1 add scene height in the z direction
                 pixel_color = output[j][i]
                 array_3d_points_with_color.append([1,2,3,4,5,6])
-    '''
+    array_planes_with_6d_points.append(array_3d_points_with_color)
     # Generate side walls
 
 # Given 4 points and where the plane is facing, function returns plane width and height
@@ -207,10 +190,17 @@ def colourAll2DPoints(arr_2dPts, arr_3dPts):
     for x in range (0, len(arr_2dPts)):
         colour2Dpoint(arr_2dPts[x], arr_3dPts[x])
 
-global grayscalePicture
-global colorPicture
-global picHeight
-global picWidth
+def toRad(degree):
+    return degree*math.pi/180
+
+def getRMatrix(xDeg, yDeg, zDeg):
+    xDeg = toRad(xDeg)
+    yDeg = toRad(yDeg)
+    zDeg = toRad(zDeg)
+    output = np.array([[math.cos(zDeg)*math.cos(yDeg), math.cos(zDeg)*math.sin(yDeg)*math.sin(xDeg)-math.sin(zDeg)*math.sin(xDeg), math.cos(zDeg)*math.sin(yDeg)*math.cos(xDeg) + math.sin(zDeg)*math.sin(xDeg)],
+                      [math.sin(zDeg)*math.cos(yDeg), math.sin(zDeg)*math.sin(yDeg)*math.sin(xDeg)+math.cos(zDeg)*math.cos(xDeg), math.sin(zDeg)*math.sin(yDeg)*math.cos(xDeg) + math.cos(zDeg)*math.sin(xDeg)],
+                      [-math.sin(yDeg), math.cos(yDeg)*math.sin(xDeg), math.cos(yDeg)*math.cos(xDeg)]])
+    return output
 
 grayscalePicture = cv2.imread("assets/project.jpeg", cv2.CV_LOAD_IMAGE_GRAYSCALE)
 baseImage = cv2.imread("assets/project.jpeg", cv2.CV_LOAD_IMAGE_COLOR)
@@ -228,19 +218,22 @@ resultPicture[:] = (0, 0, 0)
 initialize()
 processInput()
 
-# Hardcoded certain point for testing
-#pointsMatrix = np.float32(getPointsArray(-816,-612,816,612,100))
-pointsMatrix = np.float32([array_3d_points_with_color[i][0:3] for i in range(0,len(array_3d_points_with_color))])
-# Setting camera parameters
-camera = np.matrix([[300.0, 0, 767],[0, 300.0, 850],[0, 0, 1]])
-# Getting projected points, (pointsMatrix, rotation vector, translation vector, camera, coefficients)
-resultPoints = cv2.projectPoints(pointsMatrix, (0, 0, 0), (0, 2, 0), camera, 0)
+# for all planes, do perspective projection
+for i in range(len(array_planes_with_6d_points)):
 
-# For each point, check if in bounds and print, else nothing. Note that out of bounds on picture will cause wrap around.
-for x in range(0, len(resultPoints[0])):
-    if resultPoints[0][x][0][1] < picHeight and resultPoints[0][x][0][0] < picWidth and resultPoints[0][x][0][1]  > 0 and resultPoints[0][x][0][0] > 0:
-        #resultPicture[resultPoints[0][x][0][1]][resultPoints[0][x][0][0]] = colorPicture[pointsMatrix[x][1],pointsMatrix[x][0]]
-        resultPicture[int(resultPoints[0][x][0][1])][int(resultPoints[0][x][0][0])] = [array_3d_points_with_color[x][3], array_3d_points_with_color[x][4], array_3d_points_with_color[x][5]]
+    array_3d_points_with_color = array_planes_with_6d_points[i]
+    pointsMatrix = np.float32([array_3d_points_with_color[i][0:3] for i in range(0,len(array_3d_points_with_color))])
+    # Setting camera parameters
+    camera = np.matrix([[300.0, 0, 767],[0, 300.0, 850],[0, 0, 1]])
+    # Getting projected points, (pointsMatrix, rotation vector, translation vector, camera, coefficients)
+    resultPoints = cv2.projectPoints(pointsMatrix, (-0.5,0,0), (0, 2, 0), camera, 0)
+    #resultPoints = cv2.projectPoints(pointsMatrix, (0, 0, 0), (0, 2, 0), camera, 0)
+
+    # For each point, check if in bounds and print, else nothing. Note that out of bounds on picture will cause wrap around.
+    for x in range(0, len(resultPoints[0])):
+        if resultPoints[0][x][0][1] < picHeight and resultPoints[0][x][0][0] < picWidth and resultPoints[0][x][0][1]  > 0 and resultPoints[0][x][0][0] > 0:
+            #resultPicture[resultPoints[0][x][0][1]][resultPoints[0][x][0][0]] = colorPicture[pointsMatrix[x][1],pointsMatrix[x][0]]
+            resultPicture[int(resultPoints[0][x][0][1])][int(resultPoints[0][x][0][0])] = [array_3d_points_with_color[x][3], array_3d_points_with_color[x][4], array_3d_points_with_color[x][5]]
 
 # Resultant picture
 cv2.imshow("qwe", resultPicture)
