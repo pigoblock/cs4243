@@ -25,6 +25,8 @@
 4 front (left pillar of the pagoda in front)
 4 front (right pillar of the pagoda in front)
 4 front (Green triangular thing front)
+4 up (left stairs top)
+4 up (right stairs top)
 4 front (left stairs block front)
 4 front (right stairs block front)
 4 front (Middle stairs block front)
