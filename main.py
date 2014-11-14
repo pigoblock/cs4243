@@ -48,7 +48,7 @@ def createVideoSequence():
         generalBlender(resultImg, picWidth, picHeight)
         cv2.imwrite(file_name + str(frame_count) + file_extension, resultImg)
         frame_count += 1
-
+    '''
     frame_count = 150
     for i in range(75):
         initializeVariablesFromFiles()
@@ -58,7 +58,7 @@ def createVideoSequence():
         generalBlender(resultImg, picWidth, picHeight)
         cv2.imwrite(file_name + str(frame_count) + file_extension, resultImg)
         frame_count += 1
-
+        '''
     frame_count = 225
     for i in range(75):
         initializeVariablesFromFiles()
