@@ -25,16 +25,16 @@ def createVideoSequence():
     file_name = "result_"
     file_extension = ".jpg"
     frame_count = 0
-<<<<<<< HEAD
     for i in range(1):
         r_vector = (0,0,0)
         t_vector = (0,5,-i/2.0)
-=======
 
     initializeVariablesFromFiles()
     r_vector = (0, 0, 0)
     t_vector = (0, 5, 0)
     resultImg = processImage(r_vector, t_vector, frame_count)
+    #fillGapsAbsolute(resultImg, picWidth, picHeight)
+    #generalBlender(resultImg, picWidth, picHeight)
     cv2.imwrite(file_name + str(frame_count) + file_extension, resultImg)
 
     '''
@@ -121,13 +121,8 @@ def processImage(r_vector, t_vector, sequence_number):
     return resultImg
 
 # Given plane details, function will generate all possible 3d points and attach pixel color found through warped transformation
-<<<<<<< HEAD
-def performHomography(numPoints, planeDirection, resultImg, r_vector, t_vector):
-    #print "Performing homography for plane"
-=======
 def performHomography(numPoints, planeDirection, resultImg, r_vector, t_vector, planeDescription, isGrass):
     #print "Performing homography for plane: " + planeDescription
->>>>>>> b67e4043b7cd0bc191ed06ac839f39d1ae201927
     array_points_2d = array_2d_points_raw[:numPoints]
     array_points_3d = array_3d_points_raw[:numPoints]
     del array_2d_points_raw[:numPoints]
@@ -201,29 +196,32 @@ def getExtractedAreaFromCorners(pic, leftX, rightX, topY, bottomY):
     print extractedArea
     return extractedArea
 
-# Fills in black colored holes with a selected color of pixel of furthest color distance
-def fillGapsAbsolute(fullPic, plane, relativeX, relativeY):
-    hsvPlane = cv2.cvtColor(plane, cv2.COLOR_BGR2HSV)
-    height = plane.shape[0]
-    width = plane.shape[1]
-    for x in range (width):
-        for y in range (height):
-            actualPointX = x + relativeX
-            actualPointY = y + relativeY
-            bgrPoint = plane[y, x]
-            blue = int(bgrPoint[0])
-            green = int(bgrPoint[1])
-            red = int(bgrPoint[2])
+# Extract and returns an area from picture
+def getExtractedArea(pic, areaRadius, centerX, centerY):
+    extractedArea = pic[:, centerX-areaRadius:centerX+areaRadius]
+    extractedArea = extractedArea[centerY-areaRadius:centerY+areaRadius, :]
 
-            hsv = hsvPlane[y, x]
+    return extractedArea
+
+# Fills in black colored holes with a selected color of pixel of furthest color distance
+def fillGapsAbsolute(picture, width, height):
+    hsvPic = cv2.cvtColor(picture, cv2.COLOR_BGR2HSV)
+    for x in range (width):
+        for y in range (height):          
+            intensity = picture[y, x]
+            blue = int(intensity[0])
+            green = int(intensity[1])
+            red = int(intensity[2])
+
+            hsv = hsvPic[y, x]
             h = int(hsv[0])
             s = int(hsv[1])
             v = int(hsv[2])
             
             # if it is a hole
-            if (v <= 50):
-                print "Hole found at [", x, ", ", y, "]"
-                surroundingPixels = getExtractedArea(fullPic, 3, x, y)
+            if (v <= 30):
+                #print "Hole found at [", x, ", ", y, "]"
+                surroundingPixels = getExtractedArea(picture, 3, x, y)
                 spHeight = surroundingPixels.shape[0]
                 spWidth = surroundingPixels.shape[1]
 
@@ -233,68 +231,59 @@ def fillGapsAbsolute(fullPic, plane, relativeX, relativeY):
                 maxB = 0
                 for i in range (spWidth):
                     for j in range (spHeight):
-                        spBlue = int(surroundingPixels[j, i][2])
-                        spGreen = int(surroundingPixels[j, i][3])
-                        spRed = int(surroundingPixels[j, i][4])
-                        totalIntensity = (spBlue-blue)**2 + (spGreen-green)**2 + (spRed-red)**2
+                        spIntensity = surroundingPixels[j, i]
+                        totalIntensity = (int(spIntensity[0])-blue)**2 + (int(spIntensity[1])-green)**2 + (int(spIntensity[2])-red)**2
                         # Get color of max distance
                         if (totalIntensity > maxColorDistance):
                             maxColorDistance = totalIntensity
-                            maxB = spBlue
-                            maxG = spGreen
-                            maxR = spRed
+                            maxB = spIntensity[0]
+                            maxG = spIntensity[1]
+                            maxR = spIntensity[2]
 
                 #Fill in the hole
-                fullPic[actualPointY, actualPointX] = (maxB, maxG, maxR)
+                picture[y, x] = (maxB, maxG, maxR)
 
-# Fills large gaps with a selected color
-def floodFillLargeGaps(picture, width, height, color):
-    seedPoint = (0, 0)
-    mask = np.zeros((height+2, width+2), np.uint8)
-    cv2.floodFill(picture, mask, seedPoint, color, (6, 6, 6), (6, 6, 6))
+# Takes the average colour of surrounding pixels to paint black pixel holes 
+def generalBlender(picture, width, height):
+    hsvPic = cv2.cvtColor(picture, cv2.COLOR_BGR2HSV)
+    for x in range (width):
+        for y in range (height):
+            intensity = picture[y, x];
+            blue = intensity[0];
+            green = intensity[1];
+            red = intensity[2];
 
-def touchup(fullPic, rawPlanePoints):
-    green = (39, 92, 66)
-    blue = (227, 191, 145)
+            avgBlue = 0;
+            avgGreen = 0;
+            avgRed = 0;
+            numValidSP = 0;
 
-    topLeft = rawPlanePoints[0][0]
-    bottomRight = rawPlanePoints[len(rawPlanePoints) - 1][0]
-    tlX = int(topLeft[0])
-    tlY = int(topLeft[1])
-    brX = int(bottomRight[0])
-    brY = int(bottomRight[1])
+            hsv = hsvPic[y, x]
+            h = int(hsv[0])
+            s = int(hsv[1])
+            v = int(hsv[2])
 
-    minY = brY
-    maxY = tlY
-    trIndex = 0
-    blIndex = 0
+            # if it is a hole
+            if (v <= 50):
+                print "Hole found at [", x, ", ", y, "]"
+                surroundingPixels = getExtractedArea(picture, 3, x, y)
+                spHeight = surroundingPixels.shape[0]
+                spWidth = surroundingPixels.shape[1]
+                for i in range (spWidth):
+                    for j in range (spHeight):
+                        spIntensity = surroundingPixels[j, i];
+                        if (i != x and j != y and spIntensity[0] > 50 and spIntensity[1] > 50 and spIntensity[2] > 50):
+                            avgBlue += spIntensity[0]
+                            avgGreen += spIntensity[1]
+                            avgRed += spIntensity[2]
+                            numValidSP += 1
+                if (numValidSP > 0):
+                    avgBlue /= numValidSP
+                    avgGreen /= numValidSP
+                    avgRed /= numValidSP
 
-    # Find other two corners
-    # Assumes vertical gradients are always perpendicular to XZ plane
-    for i in range(1, len(rawPlanePoints)-1):
-        if (int(rawPlanePoints[i][0][0]) == brX and int(rawPlanePoints[i][0][1]) < minY):
-            minY = rawPlanePoints[i][0][1]
-            trIndex = i
-        elif (int(rawPlanePoints[i][0][0]) == tlX and int(rawPlanePoints[i][0][1]) > maxY):
-            maxY = rawPlanePoints[i][0][1]
-            blIndex = i
-    topRight = rawPlanePoints[trIndex][0]
-    bottomLeft = rawPlanePoints[blIndex][0]
+                #Fill in the hole
+                picture[y, x] = (avgBlue, avgGreen, avgRed)
 
-    #print topLeft, topRight, bottomRight, bottomLeft
-
-    # If left side longer than right side
-    if (int(bottomLeft[1]) - tlY > brY - int(topRight[1])):
-        topY = tlY
-        bottomY = bottomLeft[1]
-    else:
-        topY = int(topRight[1])
-        bottomY = brY
-
-    #print tlX, int(topRight[0]), topY, bottomY
-    planeToFill = getExtractedAreaFromCorners(fullPic, tlX, int(topRight[0]), topY, bottomY)
-
-    # Do actual touchup 
-    fillGapsAbsolute(fullPic, planeToFill, tlX, tlY)
     
 main()
