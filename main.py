@@ -72,7 +72,7 @@ def generate3DpointsRectangle(numPoints, planeDirection):
     array_points_3d = array_3d_points_raw[:numPoints]
     del array_2d_points_raw[:numPoints]
     del array_3d_points_raw[:numPoints]
-    '''
+    
     # Painting with rectangles
     pointsMatrix = np.float32([array_points_3d])
     camera = np.matrix([[300.0, 0, 767],[0, 300.0, 850],[0, 0, 1]])
@@ -85,12 +85,12 @@ def generate3DpointsRectangle(numPoints, planeDirection):
     corner_points.append(resultPoints[0][1][0])
     corner_points.append(resultPoints[0][2][0])
     corner_points.append(resultPoints[0][3][0])
-    polygon = np.array([point1, point2, point3, point4 ], np.int32)
+    """polygon = np.array([point1, point2, point3, point4 ], np.int32)
     if planeDirection == 'up':
         cv2.fillConvexPoly(resultPicture, polygon, [39,92,66])
     else:
         cv2.fillConvexPoly(resultPicture, polygon, [141,175,204])
-    '''
+    """
     scene_width, scene_height = getSceneSize(array_points_3d, planeDirection)
     scene_width *= 20
     scene_height *= 20
@@ -202,59 +202,28 @@ def getRMatrix(xDeg, yDeg, zDeg):
                       [-math.sin(yDeg), math.cos(yDeg)*math.sin(xDeg), math.cos(yDeg)*math.cos(xDeg)]])
     return output
 
-# Takes the average colour of surrounding pixels to paint black pixel holes 
-def generalBlender(picture, width, height):
-    hsvPic = cv2.cvtColor(picture, cv2.COLOR_BGR2HSV)
-    for x in range (width):
-        for y in range (height):
-            intensity = picture[y, x];
-            blue = intensity[0];
-            green = intensity[1];
-            red = intensity[2];
-
-            avgBlue = 0;
-            avgGreen = 0;
-            avgRed = 0;
-            numValidSP = 0;
-
-            hsv = hsvPic[y, x]
-            h = int(hsv[0])
-            s = int(hsv[1])
-            v = int(hsv[2])
-
-            # if it is a hole
-            if (v <= 50):
-                print "Hole found at [", x, ", ", y, "]"
-                surroundingPixels = getExtractedArea(picture, 3, x, y)
-                spHeight = surroundingPixels.shape[0]
-                spWidth = surroundingPixels.shape[1]
-                for i in range (spWidth):
-                    for j in range (spHeight):
-                        spIntensity = surroundingPixels[j, i];
-                        if (i != x and j != y and spIntensity[0] > 50 and spIntensity[1] > 50 and spIntensity[2] > 50):
-                            avgBlue += spIntensity[0]
-                            avgGreen += spIntensity[1]
-                            avgRed += spIntensity[2]
-                            numValidSP += 1
-                if (numValidSP > 0):
-                    avgBlue /= numValidSP
-                    avgGreen /= numValidSP
-                    avgRed /= numValidSP
-
-                #Fill in the hole
-                picture[y, x] = (avgBlue, avgGreen, avgRed)
+# Extract and returns an area from picture with different parameters
+def getExtractedAreaFromCorners(pic, leftX, rightX, topY, bottomY):
+    extractedArea = pic[:, leftX:rightX]
+    extractedArea = extractedArea[topY:bottomY, :]
+    print extractedArea
+    return extractedArea
 
 # Fills in black colored holes with a selected color of pixel of furthest color distance
-def fillGapsAbsolute(picture, width, height):
-    hsvPic = cv2.cvtColor(picture, cv2.COLOR_BGR2HSV)
+def fillGapsAbsolute(fullPic, plane, relativeX, relativeY):
+    hsvPlane = cv2.cvtColor(plane, cv2.COLOR_BGR2HSV)
+    height = plane.shape[0]
+    width = plane.shape[1]
     for x in range (width):
-        for y in range (height):          
-            intensity = picture[y, x]
-            blue = int(intensity[0])
-            green = int(intensity[1])
-            red = int(intensity[2])
+        for y in range (height):
+            actualPointX = x + relativeX
+            actualPointY = y + relativeY
+            bgrPoint = plane[y, x]
+            blue = int(bgrPoint[0])
+            green = int(bgrPoint[1])
+            red = int(bgrPoint[2])
 
-            hsv = hsvPic[y, x]
+            hsv = hsvPlane[y, x]
             h = int(hsv[0])
             s = int(hsv[1])
             v = int(hsv[2])
@@ -262,7 +231,7 @@ def fillGapsAbsolute(picture, width, height):
             # if it is a hole
             if (v <= 50):
                 print "Hole found at [", x, ", ", y, "]"
-                surroundingPixels = getExtractedArea(picture, 3, x, y)
+                surroundingPixels = getExtractedArea(fullPic, 3, x, y)
                 spHeight = surroundingPixels.shape[0]
                 spWidth = surroundingPixels.shape[1]
 
@@ -272,17 +241,19 @@ def fillGapsAbsolute(picture, width, height):
                 maxB = 0
                 for i in range (spWidth):
                     for j in range (spHeight):
-                        spIntensity = surroundingPixels[j, i]
-                        totalIntensity = (int(spIntensity[0])-blue)**2 + (int(spIntensity[1])-green)**2 + (int(spIntensity[2])-red)**2
+                        spBlue = int(surroundingPixels[j, i][2])
+                        spGreen = int(surroundingPixels[j, i][3])
+                        spRed = int(surroundingPixels[j, i][4])
+                        totalIntensity = (spBlue-blue)**2 + (spGreen-green)**2 + (spRed-red)**2
                         # Get color of max distance
                         if (totalIntensity > maxColorDistance):
                             maxColorDistance = totalIntensity
-                            maxB = spIntensity[0]
-                            maxG = spIntensity[1]
-                            maxR = spIntensity[2]
+                            maxB = spBlue
+                            maxG = spGreen
+                            maxR = spRed
 
                 #Fill in the hole
-                picture[y, x] = (maxB, maxG, maxR)
+                fullPic[actualPointY, actualPointX] = (maxB, maxG, maxR)
 
 # Fills large gaps with a selected color
 def floodFillLargeGaps(picture, width, height, color):
@@ -290,129 +261,47 @@ def floodFillLargeGaps(picture, width, height, color):
     mask = np.zeros((height+2, width+2), np.uint8)
     cv2.floodFill(picture, mask, seedPoint, color, (6, 6, 6), (6, 6, 6))
 
-# Fills in color of building
-def planeFaceFiller(plane):
-    hsvPlane = cv2.cvtColor(plane, cv2.COLOR_BGR2HSV)
-    holeThreshold = 5;
-    height = plane.shape[0]
-    width = plane.shape[1]
-    x = 5
-    y = 5
-    holeCounter = 0
-    avgBlue = 0
-    avgGreen = 0
-    avgRed = 0
-    numValid = 0
-    wallNotValid = False
-    foundAvgWallColor = False
+def touchup(fullPic, rawPlanePoints):
+    topLeft = rawPlanePoints[0][0]
+    bottomRight = rawPlanePoints[len(rawPlanePoints) - 1][0]
+    tlX = int(topLeft[0])
+    tlY = int(topLeft[1])
+    brX = int(bottomRight[0])
+    brY = int(bottomRight[1])
 
-    # Find average color of a valid patch of wall from plane
-    while (x < width - 5):
-        while (y < height - 5):
-            # Get a patch of wall
-            wallPatchBGR = getExtractedArea(plane, 3, x, y)
-            wallPatchHSV = getExtractedArea(hsvPlane, 3, x, y)
-            wallPatchH = wallPatchHSV.shape[0]
-            wallPatchW = wallPatchHSV.shape[1]
+    minY = brY
+    maxY = tlY
+    trIndex = 0
+    blIndex = 0
 
-            # Verify if wall is really a wall or just full of holes
-            for i in range(wallPatchW):
-                for j in range(wallPatchH):
-                    h = int(wallPatchHSV[j, i][0])
-                    s = int(wallPatchHSV[j, i][1])
-                    v = int(wallPatchHSV[j, i][2])
-                    if (v <= 50):   # If it is a hole
-                        holeCounter += 1
-                    elif (h <= 110 and h >= 90 and s >= 20  and v >= 120):     # If it is the sky
-                        holeCounter += 1
-                    else:
-                        avgBlue += int(wallPatchBGR[j, i][0])
-                        avgGreen += int(wallPatchBGR[j, i][1])
-                        avgRed += int(wallPatchBGR[j, i][2])
-                        numValid += 1
-                    # If too many holes
-                    if (holeCounter > holeThreshold):
-                        print "Too many holes"
-                        holeCounter = 0
-                        avgBlue = 0
-                        avgGreen = 0
-                        avgRed = 0
-                        numValid = 0
-                        wallNotValid = True
-                        break
-                if (wallNotValid):
-                    wallNotValid = False
-                    break
-                else:
-                    foundAvgWallColor = True
-                    break
+    # Find other two corners
+    # Assumes vertical gradients are always perpendicular to XZ plane
+    for i in range(1, len(rawPlanePoints)-1):
+        if (int(rawPlanePoints[i][0][0]) == brX and int(rawPlanePoints[i][0][1]) < minY):
+            minY = rawPlanePoints[i][0][1]
+            trIndex = i
+        elif (int(rawPlanePoints[i][0][0]) == tlX and int(rawPlanePoints[i][0][1]) > maxY):
+            maxY = rawPlanePoints[i][0][1]
+            blIndex = i
+    topRight = rawPlanePoints[trIndex][0]
+    bottomLeft = rawPlanePoints[blIndex][0]
 
-            if (foundAvgWallColor):
-                break
-            y += 5
-        if (foundAvgWallColor):
-            break
-        x += 5
+    #print topLeft, topRight, bottomRight, bottomLeft
 
-    # Determine wall color
-    if (foundAvgWallColor):
-        print "Found wall color"
-        avgBlue /= numValid
-        avgGreen /= numValid
-        avgRed /= numValid
-    else:   # Use default wall color if cannot find best average wall color
-        print "Using default wall color"
-        avgBlue = 141
-        avgGreen = 175
-        avgRed = 204
-    print "Average colors: ", avgBlue, avgGreen, avgRed
+    # If left side longer than right side
+    if (int(bottomLeft[1]) - tlY > brY - int(topRight[1])):
+        topY = tlY
+        bottomY = bottomLeft[1]
+    else:
+        topY = int(topRight[1])
+        bottomY = brY
+
+    #print tlX, int(topRight[0]), topY, bottomY
+    planeToFill = getExtractedAreaFromCorners(fullPic, tlX, int(topRight[0]), topY, bottomY)
+
+    # Do actual touchup 
+    fillGapsAbsolute(fullPic, planeToFill, tlX, tlY)
     
-    # Fill in pixels with wall color
-    for x in range(width):
-        for y in range(height):
-            h = int(hsvPlane[y, x][0])
-            s = int(hsvPlane[y, x][1])
-            v = int(hsvPlane[y, x][2])
-            #print h, s, v
-            if (h <= 110 and h >= 90 and s >= 20 and v>= 120):
-                print "Filling in holes"
-                plane[y, x] = (avgBlue, avgGreen, avgRed)
-
-def touchup():
-    i = 0
-    x = 0
-    while (i < len(corner_points)):
-        topLeft = corner_points[i]
-        topRight = corner_points[i+1]
-        bottomRight = corner_points[i+2]
-        bottomLeft = corner_points[i+3]
-        brX = int(bottomRight[0])
-        brY = int(bottomRight[1])
-        print topLeft, topRight, bottomRight, bottomLeft
-
-        # Form square/rectangular plane
-        # Assumes vertical gradiants are always perpendicular to XZ plane
-        if (abs(topLeft[1] - bottomLeft[1]) > abs(topRight[1] - bottomRight[1])):
-            height = abs(topLeft[1] - bottomLeft[1])
-        else:
-            height = abs(topRight[1] - bottomRight[1])
-        width = brX - topLeft[0]
-        planeToFill = np.array([height, width])
-
-        # Find points in the plane
-        while (x < len(resultPoints[0])):
-            point = resultPoints[0][x][0]
-            pointX = int(point[0])
-            pointY = int(point[1])
-            coordColorPoint = [pointX, pointY, array_3d_points_with_color[x][3], array_3d_points_with_color[x][4], array_3d_points_with_color[x][5]]
-
-            planeToFill[pointX-topLeft[0], pointY-topLeft[1]] = coordColorPoint
-            if (pointX == brX and pointY == brY):
-                x += 1
-                break
-            x += 1
-        i += 4
-
 green = (39, 92, 66)
 blue = (227, 191, 145)  
 grayscalePicture = cv2.imread("assets/project.jpeg", cv2.CV_LOAD_IMAGE_GRAYSCALE)
@@ -438,7 +327,7 @@ for i in range(len(array_planes_with_6d_points)):
     # Setting camera parameters
     camera = np.matrix([[300.0, 0, 767],[0, 300.0, 850],[0, 0, 1]])
     # Getting projected points, (pointsMatrix, rotation vector, translation vector, camera, coefficients)
-    resultPoints = cv2.projectPoints(pointsMatrix, (-1,0,0), (0, 2, 0), camera, 0)
+    resultPoints = cv2.projectPoints(pointsMatrix, (0,0,0), (0, 2, 0), camera, 0)
     #resultPoints = cv2.projectPoints(pointsMatrix, (0, 0, 0), (0, 2, 0), camera, 0)
 
     # For each point, check if in bounds and print, else nothing. Note that out of bounds on picture will cause wrap around.
@@ -447,7 +336,8 @@ for i in range(len(array_planes_with_6d_points)):
             #resultPicture[resultPoints[0][x][0][1]][resultPoints[0][x][0][0]] = colorPicture[pointsMatrix[x][1],pointsMatrix[x][0]]
             resultPicture[int(resultPoints[0][x][0][1])][int(resultPoints[0][x][0][0])] = [array_3d_points_with_color[x][3], array_3d_points_with_color[x][4], array_3d_points_with_color[x][5]]
 
+    touchup(resultPicture, np.array(resultPoints[0]))
+    
 # Resultant picture
 #cv2.imshow("qwe", resultPicture)
-touchup()
 cv2.imwrite("result.jpg", resultPicture);
