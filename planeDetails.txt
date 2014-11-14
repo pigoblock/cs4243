@@ -8,6 +8,7 @@
 4 front (right of pagoda 2)
 4 front (left of pagoda)
 4 front (Black doorway front)
+4 up (gap between black doorway and pagoda)
 4 left (left pillar of the pagoda in front - left plane) 
 4 right (left pillar of the pagoda in front - right plane)
 4 left (right pillar of the pagoda in front - left plane)
@@ -31,3 +32,5 @@
 4 right (imaginary build on the left of pic-part 6)
 4 left (2nd most right building top)
 4 left (2nd most right building btm)
+4 left (Most right building top)
+4 left (Most right building btm)
