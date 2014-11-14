@@ -264,8 +264,8 @@ def generalBlender(picture, width, height):
             v = int(hsv[2])
 
             # if it is a hole
-            if (v <= 50):
-                print "Hole found at [", x, ", ", y, "]"
+            if (v <= 30):
+                #print "Hole found at [", x, ", ", y, "]"
                 surroundingPixels = getExtractedArea(picture, 3, x, y)
                 spHeight = surroundingPixels.shape[0]
                 spWidth = surroundingPixels.shape[1]
