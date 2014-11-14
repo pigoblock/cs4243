@@ -33,8 +33,9 @@ def createVideoSequence():
     r_vector = (0, 0, 0)
     t_vector = (0, 5, 0)
     resultImg = processImage(r_vector, t_vector, frame_count)
-    #fillGapsAbsolute(resultImg, picWidth, picHeight)
     #generalBlender(resultImg, picWidth, picHeight)
+    #fillGapsAbsolute(resultImg, picWidth, picHeight)
+    #deNoise(resultImg)
     cv2.imwrite(file_name + str(frame_count) + file_extension, resultImg)
 
     '''
@@ -189,13 +190,6 @@ def overlayImage(resultImage, homoImage):
     resultImage = newResultImage + newHomoImage
     return resultImage
 
-# Extract and returns an area from picture with different parameters
-def getExtractedAreaFromCorners(pic, leftX, rightX, topY, bottomY):
-    extractedArea = pic[:, leftX:rightX]
-    extractedArea = extractedArea[topY:bottomY, :]
-    print extractedArea
-    return extractedArea
-
 # Extract and returns an area from picture
 def getExtractedArea(pic, areaRadius, centerX, centerY):
     extractedArea = pic[:, centerX-areaRadius:centerX+areaRadius]
@@ -285,5 +279,7 @@ def generalBlender(picture, width, height):
                 #Fill in the hole
                 picture[y, x] = (avgBlue, avgGreen, avgRed)
 
+def deNoise(image):
+    cv2.fastNlMeansDenoisingColored(image, None, 10, 10, 7, 21) 
     
 main()

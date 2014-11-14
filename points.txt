@@ -30,10 +30,46 @@
 960 815 90 -20 100
 960 859 90 10 100
 851 859 50 10 100
-563 818 -50 -20 100 Left building beside pagoda
-702 818 -10 -20 100
-702 851 -10 10 100
-563 851 -50 10 100
+851 815 -50 -20 100 Left building beside pagoda 1 
+960 815 -10 -20 100
+960 859 -10 10 100
+851 859 -50 10 100
+851 815 -90 -20 100 Left building beside pagoda 2 
+960 815 -50 -20 100
+960 859 -50 10 100
+851 859 -90 10 100
+870 790 10 -30 100 Roof of building on right of pagoda (front)
+940 790 90 -30 100
+940 815 90 -20 100
+870 815 10 -20 100
+870 790 -90 -30 100 Roof of building on left of pagoda (front)
+940 790 -10 -30 100
+940 815 -10 -20 100
+870 815 -90 -20 100
+760 655 -3 -45 81 Smaller circular thing on top of middle building left
+790 655 -3 -45 75
+790 670 -3 -40 75
+760 670 -3 -40 81
+760 655 3 -45 75 Smaller circular thing on top of middle building right
+790 655 3 -45 81
+790 670 3 -40 81
+760 670 3 -40 75
+760 655 -3 -45 75 Smaller circular thing on top of middle building front
+790 655 3 -45 75
+790 670 3 -40 75
+760 670 -3 -40 75
+750 680 -5 -40 90 Circular thing on top of middle building left
+800 680 -5 -40 70
+800 732 -5 -20 70
+750 732 -5 -20 90
+750 680 5 -40 70 Circular thing on top of middle building right
+800 680 5 -40 90
+800 732 5 -20 90
+750 732 5 -20 70
+750 680 -5 -40 70 Circular thing on top of middle building front
+800 680 5 -40 70
+800 732 5 -20 70
+750 732 -5 -20 70
 750 805 -7 -20 65 Black doorway front
 790 805 7 -20 65
 790 845 7 0 65
@@ -66,6 +102,10 @@
 835 787 10 -20 50
 835 855 10 0 50
 793 855 5 0 50
+740 753 -7 -20 45 Green triangular thing front
+800 753 7 -20 45
+800 780 9 -15 45
+740 780 -9 -15 45
 650 855 -40 -3 48 Left stairs front
 760 855 -5 -3 48
 760 870 -5 0 48
