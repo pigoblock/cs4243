@@ -24,9 +24,9 @@ def createVideoSequence():
     file_name = "result_"
     file_extension = ".jpg"
     frame_count = 0
-    for i in range(20):
-        r_vector = (0,0,0)
-        t_vector = (0,5,-i/2.0)
+    for i in range(1):
+        r_vector = (0,2,0)
+        t_vector = (0,5,-10.0)
         resultImg = processImage(r_vector, t_vector, frame_count)
         cv2.imwrite(file_name + str(frame_count) + file_extension, resultImg)
         frame_count += 1
@@ -93,12 +93,13 @@ def performHomography(numPoints, planeDirection, resultImg, r_vector, t_vector):
     tempImg = cropImage(baseImage, xStart, xEnd, yStart, yEnd)
 
     array_points = getCorners(tempImg)
+    print array_points
     camera = np.matrix([[focal_length, 0, center_of_projection_x],[0, focal_length, center_of_projection_y],[0, 0, 1]])
     resultPoints = getProjectedPoints(np.array(array_points_3d, np.float32), r_vector, t_vector, camera, 0)
     warppedImage = warpHomo(np.array(array_points, np.float32), np.array(resultPoints, np.float32), (picWidth, picHeight ), tempImg)
 
     duplicateImage = resultImg.copy()
-    resultImg = overlayImage(duplicateImage, warppedImage)
+    resultImg = overlayImage(duplicateImage, warppedImage, resultPoints,planeDirection)
     return resultImg
 
 #Gets image pixels from xStart to xEnd -1, yStart to yEnd - 1
@@ -122,13 +123,69 @@ def getProjectedPoints(points_3D, Rvect, Tvect, camera, distVect):
 #Points should be in np.array float32 format, Returns the warped picture with black BG on ouputImgSize dimensions
 def warpHomo(imgPts_2D, projPts_2D, outputImgSize, croppedImg):
     H = cv2.findHomography(imgPts_2D, projPts_2D , 0 );
-    return cv2.warpPerspective(croppedImg, H[0], outputImgSize)
+    homoImage = np.zeros((picHeight,  picWidth, 3), np.uint8)
+    homoImage[:] = (0, 0, 255)
+    cv2.warpPerspective(croppedImg, H[0], outputImgSize, homoImage)
+    return homoImage
 
-def overlayImage(resultImage, homoImage):
+def overlayImage(resultImage, homoImage, resultPoints, planeDirection):
+    
+    hasProblems = False
+    problemCase = 0
+    
+    point1 = resultPoints[0]
+    point2 = resultPoints[1]
+    point3 = resultPoints[2]
+    point4 = resultPoints[3]
+    print resultPoints
+
+    if (point1[1] > point4[1]) :
+        print "Failed case 1"
+        hasProblems = True
+        problemCase += 1
+
+    if (point2[1] > point3[1]) :
+        print "Failed case 2"
+        hasProblems = True
+        problemCase += 2
+
+    if (point1[0] < point2[0] and point3[0] < point4[0]):
+        print "Failed case 3"
+        hasProblems = True
+        problemCase += 4
+
+    if (hasProblems):
+        print problemCase
+        cv2.imwrite("error.jpg", homoImage)
+    
     greyHomo = cv2.cvtColor(homoImage, cv2.cv.CV_BGR2GRAY)
     retVal, greyHomo2 = cv2.threshold(greyHomo, 0,255,cv2.cv.CV_THRESH_BINARY)
+    if (hasProblems) :
+        if (problemCase >= 4) :
+            yMin = point1[1]
+            if (point2[1] < yMin):
+                yMin = point2[1]
+            greyHomo2[:yMin] = (0)
+        if (planeDirection == 'up'):
+            yMin = point1[1]
+            if (point2[1] < yMin):
+                yMin = point2[1]
+            greyHomo2[:yMin] = (0)
+        if (planeDirection == 'left'):
+            xMin = point1[0]
+            if (point4[0] < xMin):
+                xMin = point4[0]
+            greyHomo2[:,0:xMin] = 0
+        if (planeDirection == 'right'):
+            xMax = point2[0]
+            if (point3[0] < xMax):
+                xMax = point3[0]
+            greyHomo2[:,xMax:] = 0
+        cv2.imwrite("error.jpg", greyHomo2)
+       # cv2.imshow("qweqwew", greyHomo2)
+        #cv2.waitKey()
+        
     greyHomo_inv = ~greyHomo2
-
     newResultImage = np.zeros((picHeight,  picWidth, 3), np.uint8)
     newResultImage[:] = (0, 0, 0)
     newHomoImage = np.zeros(( picHeight, picWidth , 3), np.uint8)
