@@ -2,6 +2,10 @@
 1100 900 60 0 50
 1100 1224 60 0 0
 350 1224 -60 0 0
+990 760 -200 0 100 (ground behind)
+1070 760 200 0 100
+1070 830 600 0 50
+990 830 -600 0 50
 895 555 115 -320 300 Top Tier of Tallest Tower Front
 932 555 135 -320 300
 932 575 135 -300 300   
@@ -22,90 +26,102 @@
 934 614 150 -250 250
 934 775 150 0 250
 884 775 90 0 250
+760 655 -3 -55 81 Smaller circular thing on top of middle building left
+790 655 -3 -55 75
+790 670 -3 -50 75
+760 670 -3 -50 81
+760 655 3 -55 75 Smaller circular thing on top of middle building right
+790 655 3 -55 81
+790 670 3 -50 81
+760 670 3 -50 75
+760 655 -3 -55 75 Smaller circular thing on top of middle building front
+790 655 3 -55 75
+790 670 3 -50 75
+760 670 -3 -50 75
+750 680 -5 -50 90 Circular thing on top of middle building left
+800 680 -5 -50 70
+800 732 -5 -30 70
+750 732 -5 -30 90
+750 680 5 -50 70 Circular thing on top of middle building right
+800 680 5 -50 90
+800 732 5 -30 90
+750 732 5 -30 70
+750 680 -5 -50 70 Circular thing on top of middle building front
+800 680 5 -50 70
+800 732 5 -30 70
+750 732 -5 -30 70
 851 815 10 -20 100 Right building beside pagoda 1
 960 815 50 -20 100
-960 859 50 10 100
-851 859 10 10 100
+960 859 50 0 100
+851 859 10 0 100
 851 815 50 -20 100 Right building beside pagoda 2
 960 815 90 -20 100
-960 859 90 10 100
-851 859 50 10 100
+960 859 90 0 100
+851 859 50 0 100
+851 815 90 -20 100 Right building beside pagoda 2
+960 815 130 -20 100
+960 859 130 0 100
+851 859 90 0 100
 851 815 -50 -20 100 Left building beside pagoda 1 
 960 815 -10 -20 100
-960 859 -10 10 100
-851 859 -50 10 100
+960 859 -10 0 100
+851 859 -50 0 100
 851 815 -90 -20 100 Left building beside pagoda 2 
 960 815 -50 -20 100
-960 859 -50 10 100
-851 859 -90 10 100
+960 859 -50 0 100
+851 859 -90 0 100
+851 815 -130 -20 100 Left building beside pagoda 2 
+960 815 -90 -20 100
+960 859 -90 0 100
+851 859 -130 0 100
 870 790 10 -30 100 Roof of building on right of pagoda (front)
-940 790 90 -30 100
-940 815 90 -20 100
+940 790 130 -30 100
+940 815 130 -20 100
 870 815 10 -20 100
-870 790 -90 -30 100 Roof of building on left of pagoda (front)
+870 790 -130 -30 100 Roof of building on left of pagoda (front)
 940 790 -10 -30 100
 940 815 -10 -20 100
-870 815 -90 -20 100
-760 655 -3 -45 81 Smaller circular thing on top of middle building left
-790 655 -3 -45 75
-790 670 -3 -40 75
-760 670 -3 -40 81
-760 655 3 -45 75 Smaller circular thing on top of middle building right
-790 655 3 -45 81
-790 670 3 -40 81
-760 670 3 -40 75
-760 655 -3 -45 75 Smaller circular thing on top of middle building front
-790 655 3 -45 75
-790 670 3 -40 75
-760 670 -3 -40 75
-750 680 -5 -40 90 Circular thing on top of middle building left
-800 680 -5 -40 70
-800 732 -5 -20 70
-750 732 -5 -20 90
-750 680 5 -40 70 Circular thing on top of middle building right
-800 680 5 -40 90
-800 732 5 -20 90
-750 732 5 -20 70
-750 680 -5 -40 70 Circular thing on top of middle building front
-800 680 5 -40 70
-800 732 5 -20 70
-750 732 -5 -20 70
-750 805 -7 -20 65 Black doorway front
-790 805 7 -20 65
+870 815 -130 -20 100
+750 805 -7 -30 65 Black doorway front
+790 805 7 -30 65
 790 845 7 0 65
 750 845 -7 0 65
 705 785 -5 0 65 gap between black doorway and pagoda
 750 785 5 0 65
 750 853 5 0 50
 705 853 -5 0 50
-705 785 -10 -20 60 Middle pagoda left pillar left face
-750 785 -10 -20 50
+705 785 -10 -30 100 Middle pagoda left pillar left face
+750 785 -10 -30 50
 750 853 -10 0 50
-705 853 -10 0 60
-705 785 -5 -20 50 Middle pagoda left pillar right face
-750 785 -5 -20 60
+705 853 -10 0 100
+705 785 -5 -30 50 Middle pagoda left pillar right face
+750 785 -5 -30 60
 750 853 -5 0 60
 705 853 -5 0 50
-793 787 5 -20 60 Middle pagoda right pillar left face
-835 787 5 -20 50
+793 787 5 -30 60 Middle pagoda right pillar left face
+835 787 5 -30 50
 835 855 5 0 50
 793 855 5 0 60
-793 787 10 -20 50 Middle pagoda right pillar right face
-835 787 10 -20 60
+793 787 10 -30 50 Middle pagoda right pillar right face
+835 787 10 -30 60
 835 855 10 0 60
 793 855 10 0 50
-705 785 -10 -20 50 Middle pagoda left pillar
-750 785 -5 -20 50
+705 785 -10 -30 50 Middle pagoda left pillar
+750 785 -5 -30 50
 750 853 -5 0 50
 705 853 -10 0 50
-793 787 5 -20 50 Middle pagoda right pillar
-835 787 10 -20 50
+793 787 5 -30 50 Middle pagoda right pillar
+835 787 10 -30 50
 835 855 10 0 50
 793 855 5 0 50
-740 753 -7 -20 45 Green triangular thing front
-800 753 7 -20 45
-800 780 9 -15 45
-740 780 -9 -15 45
+990 760 -10 -30 100 (cover for pagoda)
+1070 760 10 -30 100
+1070 830 10 -30 50
+990 830 -10 -30 50
+740 753 -7 -30 49 Green triangular thing front
+800 753 7 -30 49
+800 780 9 -25 49
+740 780 -9 -25 49
 1130 720 -40 -3 48 Left stairs top
 1170 720 -5 -3 48
 1170 850 -5 -3 45
