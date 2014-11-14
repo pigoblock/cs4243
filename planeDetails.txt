@@ -1,6 +1,2 @@
 4 front (left pillar of the pagoda in front)
 4 front (right pillar of the pagoda in front)
-4 up (ground)
-4 front (tallest tower)
-4 front (tower behind pagoda)
-4 left (right building without trees)
