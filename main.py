@@ -25,43 +25,47 @@ def createVideoSequence():
     file_name = "result_"
     file_extension = ".jpg"
     frame_count = 0
-    for i in range(1):
-        r_vector = (0,0,0)
-        t_vector = (0,5,-i/2.0)
 
-    initializeVariablesFromFiles()
-    r_vector = (0, 0, 0)
-    t_vector = (0, 5, 0)
-    resultImg = processImage(r_vector, t_vector, frame_count)
     #generalBlender(resultImg, picWidth, picHeight)
     #fillGapsAbsolute(resultImg, picWidth, picHeight)
     #deNoise(resultImg)
-    cv2.imwrite(file_name + str(frame_count) + file_extension, resultImg)
-
     '''
     for i in range(50):
         initializeVariablesFromFiles()
-        r_vector = (0, -0.001*i, 0)
-        t_vector = (i*0.1, 10, -i*0.15)
+        r_vector = (0, -0.003*i, 0)
+        t_vector = (i*0.3, 10, -i*0.1)
         resultImg = processImage(r_vector, t_vector, frame_count)
+        generalBlender(resultImg, picWidth, picHeight)
         cv2.imwrite(file_name + str(frame_count) + file_extension, resultImg)
         frame_count += 1
 
     frame_count = 50
     for i in range(50):
         initializeVariablesFromFiles()
-        r_vector = (0, -0.001*49 + 0.001*i, 0)
-        t_vector = (49*0.1 - i*0.2, 10, -49*0.15 - i*0.1)
+        r_vector = (0, -0.003*49 + 0.003*i, 0)
+        t_vector = (49*0.3 - i*0.3, 10, -49*0.1 - i*0.1)
         resultImg = processImage(r_vector, t_vector, frame_count)
+        generalBlender(resultImg, picWidth, picHeight)
         cv2.imwrite(file_name + str(frame_count) + file_extension, resultImg)
         frame_count += 1
 
     frame_count = 100
     for i in range(50):
         initializeVariablesFromFiles()
-        r_vector = (i*0.001, -0.001*49 + 0.001*49 - i*0.001, 0)
-        t_vector = (49*0.1 - 49*0.2 + i*0.2, 10 + i*0.1, -49*0.15 - 49*0.1 - i*0.1)
+        r_vector = (i*0.003, -0.003*49 + 0.003*49 - i*0.003, 0)
+        t_vector = (49*0.3 - 49*0.3 + i*0.3, 10 + i*0.3, -49*0.1 - 49*0.1 - i*0.1)
         resultImg = processImage(r_vector, t_vector, frame_count)
+        generalBlender(resultImg, picWidth, picHeight)
+        cv2.imwrite(file_name + str(frame_count) + file_extension, resultImg)
+        frame_count += 1
+
+    frame_count = 150
+    for i in range(50):
+        initializeVariablesFromFiles()
+        r_vector = (49*0.003 - i*0.003, -0.003*49 + 0.003*49 - 49*0.003 + 0.003 * i, 0)
+        t_vector = (49*0.3 - 49*0.3 + 49*0.3 - i*0.3, 10 + 49*0.3 - i*0.3, -49*0.1 - 49*0.1 - 49*0.1 - i*0.1)
+        resultImg = processImage(r_vector, t_vector, frame_count)
+        generalBlender(resultImg, picWidth, picHeight)
         cv2.imwrite(file_name + str(frame_count) + file_extension, resultImg)
         frame_count += 1
     '''
@@ -112,16 +116,12 @@ def processImage(r_vector, t_vector, sequence_number):
         numPoints = array_points_per_plane[i]
         planeDirection = array_plane_direction[i]
         planeDescription = array_plane_description[i]
-        if i == 0:
-            isGrass = True
-        else:
-            isGrass = False
 
-        resultImg = performHomography(numPoints, planeDirection, resultImg, r_vector, t_vector, planeDescription, isGrass)
+        resultImg = performHomography(numPoints, planeDirection, resultImg, r_vector, t_vector, planeDescription)
     return resultImg
 
 # Given plane details, function will generate all possible 3d points and attach pixel color found through warped transformation
-def performHomography(numPoints, planeDirection, resultImg, r_vector, t_vector, planeDescription, isGrass):
+def performHomography(numPoints, planeDirection, resultImg, r_vector, t_vector, planeDescription):
     #print "Performing homography for plane: " + planeDescription
     array_points_2d = array_2d_points_raw[:numPoints]
     array_points_3d = array_3d_points_raw[:numPoints]
@@ -131,10 +131,6 @@ def performHomography(numPoints, planeDirection, resultImg, r_vector, t_vector, 
     if len(array_points_2d) == 0 or len(array_points_3d) == 0:
         return resultImg
 
-    if isGrass == True:
-        array_points_3d[2][2] = t_vector[2] *-1
-        array_points_3d[3][2] = t_vector[2] *-1
-
     xStart = array_points_2d[0][0]
     xEnd = array_points_2d[1][0]
     yStart = array_points_2d[0][1]
@@ -142,13 +138,13 @@ def performHomography(numPoints, planeDirection, resultImg, r_vector, t_vector, 
     tempImg = cropImage(baseImage, xStart, xEnd, yStart, yEnd)
 
     array_points = getCorners(tempImg)
-    print array_points
+    #print array_points
     camera = np.matrix([[focal_length, 0, center_of_projection_x],[0, focal_length, center_of_projection_y],[0, 0, 1]])
     resultPoints = getProjectedPoints(np.array(array_points_3d, np.float32), r_vector, t_vector, camera, 0)
     warppedImage = warpHomo(np.array(array_points, np.float32), np.array(resultPoints, np.float32), (picWidth, picHeight ), tempImg)
 
     #duplicateImage = resultImg.copy()
-    resultImg = overlayImage(resultImg, warppedImage)
+    resultImg = overlayImage(resultImg, warppedImage, resultPoints, planeDirection)
     return resultImg
 
 #Gets image pixels from xStart to xEnd -1, yStart to yEnd - 1
@@ -178,35 +174,35 @@ def warpHomo(imgPts_2D, projPts_2D, outputImgSize, croppedImg):
     return homoImage
 
 def overlayImage(resultImage, homoImage, resultPoints, planeDirection):
-    
+
     hasProblems = False
     problemCase = 0
-    
+
     point1 = resultPoints[0]
     point2 = resultPoints[1]
     point3 = resultPoints[2]
     point4 = resultPoints[3]
-    print resultPoints
+    #print resultPoints
 
     if (point1[1] > point4[1]) :
-        print "Failed case 1"
+        #print "Failed case 1"
         hasProblems = True
         problemCase += 1
 
     if (point2[1] > point3[1]) :
-        print "Failed case 2"
+        #print "Failed case 2"
         hasProblems = True
         problemCase += 2
 
     if (point1[0] < point2[0] and point3[0] < point4[0]):
-        print "Failed case 3"
+        #print "Failed case 3"
         hasProblems = True
         problemCase += 4
 
     if (hasProblems):
-        print problemCase
+        #print problemCase
         cv2.imwrite("error.jpg", homoImage)
-    
+
     greyHomo = cv2.cvtColor(homoImage, cv2.cv.CV_BGR2GRAY)
     retVal, greyHomo2 = cv2.threshold(greyHomo, 0,255,cv2.cv.CV_THRESH_BINARY)
     if (hasProblems) :
@@ -233,7 +229,7 @@ def overlayImage(resultImage, homoImage, resultPoints, planeDirection):
         cv2.imwrite("error.jpg", greyHomo2)
        # cv2.imshow("qweqwew", greyHomo2)
         #cv2.waitKey()
-        
+
     greyHomo_inv = ~greyHomo2
     newResultImage = np.zeros((picHeight,  picWidth, 3), np.uint8)
     newResultImage[:] = (0, 0, 0)
@@ -257,7 +253,7 @@ def getExtractedArea(pic, areaRadius, centerX, centerY):
 def fillGapsAbsolute(picture, width, height):
     hsvPic = cv2.cvtColor(picture, cv2.COLOR_BGR2HSV)
     for x in range (width):
-        for y in range (height):          
+        for y in range (height):
             intensity = picture[y, x]
             blue = int(intensity[0])
             green = int(intensity[1])
@@ -267,7 +263,7 @@ def fillGapsAbsolute(picture, width, height):
             h = int(hsv[0])
             s = int(hsv[1])
             v = int(hsv[2])
-            
+
             # if it is a hole
             if (v <= 30):
                 #print "Hole found at [", x, ", ", y, "]"
@@ -293,7 +289,7 @@ def fillGapsAbsolute(picture, width, height):
                 #Fill in the hole
                 picture[y, x] = (maxB, maxG, maxR)
 
-# Takes the average colour of surrounding pixels to paint black pixel holes 
+# Takes the average colour of surrounding pixels to paint black pixel holes
 def generalBlender(picture, width, height):
     hsvPic = cv2.cvtColor(picture, cv2.COLOR_BGR2HSV)
     for x in range (width):
@@ -336,6 +332,6 @@ def generalBlender(picture, width, height):
                 picture[y, x] = (avgBlue, avgGreen, avgRed)
 
 def deNoise(image):
-    cv2.fastNlMeansDenoisingColored(image, None, 10, 10, 7, 21) 
-    
+    cv2.fastNlMeansDenoisingColored(image, None, 10, 10, 7, 21)
+
 main()

@@ -150,10 +150,10 @@
 1070 760 60 -25 50
 1070 830 60 -0 50
 990 830 35 -0 50
-851 815 -60 -15 20 (imaginary build on the left of pic - 1)
+851 815 -60 -15 13 (imaginary build on the left of pic - 1)
 960 815 -60 -15 25
 960 859 -60 0 25
-851 859 -60 0 20
+851 859 -60 0 13
 851 815 -60 -15 25 (imaginary build on the left of pic - 2)
 960 815 -60 -15 38
 960 859 -60 0 38
