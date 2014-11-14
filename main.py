@@ -24,7 +24,7 @@ def createVideoSequence():
     file_name = "result_"
     file_extension = ".jpg"
     frame_count = 0
-    for i in range(20):
+    for i in range(1):
         r_vector = (0,0,0)
         t_vector = (0,5,-i/2.0)
         resultImg = processImage(r_vector, t_vector, frame_count)
@@ -77,7 +77,7 @@ def processImage(r_vector, t_vector, sequence_number):
 
 # Given plane details, function will generate all possible 3d points and attach pixel color found through warped transformation
 def performHomography(numPoints, planeDirection, resultImg, r_vector, t_vector):
-    print "Performing homography for plane"
+    #print "Performing homography for plane"
     array_points_2d = array_2d_points_raw[:numPoints]
     array_points_3d = array_3d_points_raw[:numPoints]
     del array_2d_points_raw[:numPoints]
