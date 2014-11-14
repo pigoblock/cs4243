@@ -30,40 +30,40 @@ def createVideoSequence():
     #fillGapsAbsolute(resultImg, picWidth, picHeight)
     #deNoise(resultImg)
     '''
-    for i in range(50):
+    for i in range(75):
         initializeVariablesFromFiles()
         r_vector = (0, -0.003*i, 0)
-        t_vector = (i*0.3, 10, -i*0.1)
+        t_vector = (i*0.3, 10, -i*0.07)
         resultImg = processImage(r_vector, t_vector, frame_count)
         generalBlender(resultImg, picWidth, picHeight)
         cv2.imwrite(file_name + str(frame_count) + file_extension, resultImg)
         frame_count += 1
 
-    frame_count = 50
-    for i in range(50):
+    frame_count = 75
+    for i in range(75):
         initializeVariablesFromFiles()
-        r_vector = (0, -0.003*49 + 0.003*i, 0)
-        t_vector = (49*0.3 - i*0.3, 10, -49*0.1 - i*0.1)
-        resultImg = processImage(r_vector, t_vector, frame_count)
-        generalBlender(resultImg, picWidth, picHeight)
-        cv2.imwrite(file_name + str(frame_count) + file_extension, resultImg)
-        frame_count += 1
-
-    frame_count = 100
-    for i in range(50):
-        initializeVariablesFromFiles()
-        r_vector = (i*0.003, -0.003*49 + 0.003*49 - i*0.003, 0)
-        t_vector = (49*0.3 - 49*0.3 + i*0.3, 10 + i*0.3, -49*0.1 - 49*0.1 - i*0.1)
+        r_vector = (0, -0.003*74 + 0.003*i, 0)
+        t_vector = (74*0.3 - i*0.3, 10, -74*0.07 - i*0.07)
         resultImg = processImage(r_vector, t_vector, frame_count)
         generalBlender(resultImg, picWidth, picHeight)
         cv2.imwrite(file_name + str(frame_count) + file_extension, resultImg)
         frame_count += 1
 
     frame_count = 150
-    for i in range(50):
+    for i in range(75):
         initializeVariablesFromFiles()
-        r_vector = (49*0.003 - i*0.003, -0.003*49 + 0.003*49 - 49*0.003 + 0.003 * i, 0)
-        t_vector = (49*0.3 - 49*0.3 + 49*0.3 - i*0.3, 10 + 49*0.3 - i*0.3, -49*0.1 - 49*0.1 - 49*0.1 - i*0.1)
+        r_vector = (i*0.003, -0.003*74 + 0.003*74 - i*0.003, 0)
+        t_vector = (74*0.3 - 74*0.3 + i*0.3, 10 + i*0.2, -74*0.07 - 74*0.07 - i*0.07)
+        resultImg = processImage(r_vector, t_vector, frame_count)
+        generalBlender(resultImg, picWidth, picHeight)
+        cv2.imwrite(file_name + str(frame_count) + file_extension, resultImg)
+        frame_count += 1
+
+    frame_count = 225
+    for i in range(75):
+        initializeVariablesFromFiles()
+        r_vector = (74*0.003 - i*0.003, -0.003*74 + 0.003*74 - 74*0.003 + 0.003 * i, 0)
+        t_vector = (74*0.3 - 74*0.3 + 74*0.3 - i*0.3, 10 + 74*0.2 - i*0.2, -74*0.07 - 74*0.07 - 74*0.07 - i*0.07)
         resultImg = processImage(r_vector, t_vector, frame_count)
         generalBlender(resultImg, picWidth, picHeight)
         cv2.imwrite(file_name + str(frame_count) + file_extension, resultImg)
