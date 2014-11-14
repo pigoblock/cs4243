@@ -1,27 +1,83 @@
-350 900 -30 0 50 Grass
-1100 900 30 0 50
-1100 1224 30 0 0
-350 1224 -30 0 0
-884 614 100 -250 300 Tallest Tower Front on the left
-934 614 100 -250 250
-934 775 100 0 250
-884 775 100 0 300
+350 900 -60 0 50 Grass
+1100 900 60 0 50
+1100 1224 60 0 0
+350 1224 -60 0 0
+895 555 115 -320 300 Top Tier of Tallest Tower Front
+932 555 135 -320 300
+932 575 135 -300 300   
+895 575 115 -300 300
+890 575 100 -300 280 Second Tier of Tallest tower front
+932 575 140 -300 280
+932 614 140 -250 280   
+890 614 100 -250 280
+884 614 90 -250 300 Tallest Tower Front on the left
+934 614 90 -250 250
+934 775 90 0 250
+884 775 90 0 300
 884 614 150 -250 250 Tallest Tower Front on the right
 934 614 150 -250 300
 934 775 150 0 300
 884 775 150 0 250
-884 614 100 -250 250 Tallest Tower Front at the back
+884 614 90 -250 250 Tallest Tower Front
 934 614 150 -250 250
 934 775 150 0 250
-884 775 100 0 250
-838 815 10 -20 100 Right building beside pagoda
-966 815 50 -20 100
-966 859 50 0 100
-838 859 10 0 100
-563 818 -50 -20 100 Left building beside pagoda
-702 818 -10 -20 100
-702 851 -10 0 100
-563 851 -50 0 100
+884 775 90 0 250
+851 815 10 -20 100 Right building beside pagoda 1
+960 815 50 -20 100
+960 859 50 10 100
+851 859 10 10 100
+851 815 50 -20 100 Right building beside pagoda 2
+960 815 90 -20 100
+960 859 90 10 100
+851 859 50 10 100
+851 815 -50 -20 100 Left building beside pagoda 1 
+960 815 -10 -20 100
+960 859 -10 10 100
+851 859 -50 10 100
+851 815 -90 -20 100 Left building beside pagoda 2 
+960 815 -50 -20 100
+960 859 -50 10 100
+851 859 -90 10 100
+870 790 10 -30 100 Roof of building on right of pagoda (front)
+940 790 90 -30 100
+940 815 90 -20 100
+870 815 10 -20 100
+870 790 -90 -30 100 Roof of building on left of pagoda (front)
+940 790 -10 -30 100
+940 815 -10 -20 100
+870 815 -90 -20 100
+760 655 -3 -45 81 Smaller circular thing on top of middle building left
+790 655 -3 -45 75
+790 670 -3 -40 75
+760 670 -3 -40 81
+760 655 3 -45 75 Smaller circular thing on top of middle building right
+790 655 3 -45 81
+790 670 3 -40 81
+760 670 3 -40 75
+760 655 -3 -45 75 Smaller circular thing on top of middle building front
+790 655 3 -45 75
+790 670 3 -40 75
+760 670 -3 -40 75
+750 680 -5 -40 90 Circular thing on top of middle building left
+800 680 -5 -40 70
+800 732 -5 -20 70
+750 732 -5 -20 90
+750 680 5 -40 70 Circular thing on top of middle building right
+800 680 5 -40 90
+800 732 5 -20 90
+750 732 5 -20 70
+750 680 -5 -40 70 Circular thing on top of middle building front
+800 680 5 -40 70
+800 732 5 -20 70
+750 732 -5 -20 70
+750 805 -7 -20 65 Black doorway front
+790 805 7 -20 65
+790 845 7 0 65
+750 845 -7 0 65
+705 785 -5 0 65 gap between black doorway and pagoda
+750 785 5 0 65
+750 853 5 0 50
+705 853 -5 0 50
 705 785 -10 -20 60 Middle pagoda left pillar left face
 750 785 -10 -20 50
 750 853 -10 0 50
@@ -46,3 +102,107 @@
 835 787 10 -20 50
 835 855 10 0 50
 793 855 5 0 50
+740 753 -7 -20 45 Green triangular thing front
+800 753 7 -20 45
+800 780 9 -15 45
+740 780 -9 -15 45
+650 855 -40 -3 48 Left stairs front
+760 855 -5 -3 48
+760 870 -5 0 48
+650 870 -40 0 48
+795 855 5 -3 48 Right stairs front
+905 855 40 -3 48
+905 870 40 0 48
+795 870 5 0 48
+745 850 -5 -2 45 (Middle stairs block front)
+790 850 5 -2 45
+790 875 5 0 45
+745 875 -5 0 45
+1130 720 60 -30 52 (building touching weird block-left)
+1170 720 60 -30 40
+1170 850 60 0 40
+1130 850 60 0 52
+1130 720 60 -30 60 (building touching weird block-left)
+1170 720 60 -30 52
+1170 850 60 0 52
+1130 850 60 0 60
+895 789 65 -35 60 (roof of building touching weird block1)
+938 789 65 -35 51
+938 809 60 -30 51
+895 809 60 -30 60
+895 789 65 -35 51 (roof of building touching weird block2)
+938 789 65 -35 40
+938 809 60 -30 40
+895 809 60 -30 51
+970 760 35 -25 55 (Weird block left face)
+980 760 35 -25 50
+980 840 35 -0 50
+970 840 35 -0 55
+990 760 35 -25 50 (Weird block front face)
+1070 760 60 -25 50
+1070 830 60 -0 50
+990 830 35 -0 50
+851 815 -60 -15 20 (imaginary build on the left of pic - 1)
+960 815 -60 -15 25
+960 859 -60 0 25
+851 859 -60 0 20
+851 815 -60 -15 25 (imaginary build on the left of pic - 2)
+960 815 -60 -15 38
+960 859 -60 0 38
+851 859 -60 0 25
+851 815 -60 -15 38 (imaginary build on the left of pic - 3)
+960 815 -60 -15 50
+960 859 -60 0 50
+851 859 -60 0 38
+851 815 -60 -30 13 (imaginary build on the left of pic - 4)
+960 815 -60 -30 25
+960 859 -60 -15 25
+851 859 -60 -15 13
+851 815 -60 -30 25 (imaginary build on the left of pic - 5)
+960 815 -60 -30 38
+960 859 -60 -15 38
+851 859 -60 -15 25
+851 815 -60 -30 38 (imaginary build on the left of pic - 6)
+960 815 -60 -30 50
+960 859 -60 -15 50
+851 859 -60 -15 38
+895 789 -65 -35 13 (imaginary roof 1)
+938 789 -65 -35 25
+938 809 -59 -29 25
+895 809 -59 -29 13
+895 789 -65 -35 25 (imaginary roof 2)
+938 789 -65 -35 38
+938 809 -59 -29 38
+895 809 -59 -29 25
+895 789 -65 -35 38 (imaginary roof 3)
+938 789 -65 -35 50
+938 809 -59 -29 50
+895 809 -59 -29 38
+1180 795 60 -36 30 (2nd most right building top - front)
+1235 795 100 -36 30
+1235 852 100 -18 30
+1177 852 60 -18 30
+1180 795 60 -18 30 (2nd most right building btm - front)
+1235 795 100 -18 30
+1235 852 100 0 30
+1180 852 60 0 30
+1180 795 60 -36 40 (2nd most right building top - left)
+1235 795 60 -36 30
+1235 852 60 -18 30
+1177 852 60 -18 40
+1180 795 60 -18 40 (2nd most right building btm - left)
+1235 795 60 -18 30
+1235 852 60 0 30
+1180 852 60 0 40
+895 789 70 -46 30 (2nd most right building roof - front)
+938 789 100 -46 30
+938 809 100 -36 30
+895 809 60 -36 30
+895 789 70 -46 40 (2nd most right building roof - left)
+938 789 70 -46 30
+938 809 60 -36 30
+895 809 60 -36 40
+1255 870 60 0 30 (ground between the 2 right buildings)
+1284 870 100 0 30
+1284 890 100 0 20
+1255 890 60 0 20

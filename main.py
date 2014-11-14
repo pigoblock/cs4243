@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import math
 
 # Data structures used for initializing
 img = cv2.imread("assets/project.jpeg", cv2.CV_LOAD_IMAGE_COLOR)
@@ -10,6 +11,7 @@ array_2d_points_raw = []
 array_3d_points_raw = []
 array_points_per_plane = []
 array_plane_direction = []
+array_plane_description = []
 polygonImage = np.zeros((picHeight, picWidth, 3), np.uint8)
 # Camera parameters
 focal_length = 300.0
@@ -17,7 +19,6 @@ center_of_projection_x = 767
 center_of_projection_y = 850
 
 def main():
-    initializeVariablesFromFiles()
     createVideoSequence()
 
 def createVideoSequence():
@@ -25,19 +26,52 @@ def createVideoSequence():
     file_extension = ".jpg"
     frame_count = 0
     for i in range(1):
-        r_vector = (0,2,0)
-        t_vector = (0,5,-10.0)
+        r_vector = (0,0,0)
+        t_vector = (0,5,-i/2.0)
+
+    initializeVariablesFromFiles()
+    r_vector = (0, 0, 0)
+    t_vector = (0, 5, 0)
+    resultImg = processImage(r_vector, t_vector, frame_count)
+    #generalBlender(resultImg, picWidth, picHeight)
+    #fillGapsAbsolute(resultImg, picWidth, picHeight)
+    #deNoise(resultImg)
+    cv2.imwrite(file_name + str(frame_count) + file_extension, resultImg)
+
+    '''
+    for i in range(50):
+        initializeVariablesFromFiles()
+        r_vector = (0, -0.001*i, 0)
+        t_vector = (i*0.1, 10, -i*0.15)
         resultImg = processImage(r_vector, t_vector, frame_count)
         cv2.imwrite(file_name + str(frame_count) + file_extension, resultImg)
         frame_count += 1
+
+    frame_count = 50
+    for i in range(50):
         initializeVariablesFromFiles()
+        r_vector = (0, -0.001*49 + 0.001*i, 0)
+        t_vector = (49*0.1 - i*0.2, 10, -49*0.15 - i*0.1)
+        resultImg = processImage(r_vector, t_vector, frame_count)
+        cv2.imwrite(file_name + str(frame_count) + file_extension, resultImg)
+        frame_count += 1
+
+    frame_count = 100
+    for i in range(50):
+        initializeVariablesFromFiles()
+        r_vector = (i*0.001, -0.001*49 + 0.001*49 - i*0.001, 0)
+        t_vector = (49*0.1 - 49*0.2 + i*0.2, 10 + i*0.1, -49*0.15 - 49*0.1 - i*0.1)
+        resultImg = processImage(r_vector, t_vector, frame_count)
+        cv2.imwrite(file_name + str(frame_count) + file_extension, resultImg)
+        frame_count += 1
+    '''
 
 # Initialize arrays given 2 input file obtained using InputInterface.py
 # points.txt will be sliced into 2 arrays: one containing 2d points, and the other containing the corresponding 3d points
 # planeDetails.txt will be sliced into 2 arrays: one containing number of points in one plane, and the other containing the plane direction
 def initializeVariablesFromFiles():
     # Parsing points.txt to initialize 2d and 3d points array
-    print "Parsing points.txt ..."
+    #print "Parsing points.txt ..."
     pointFile = open('points.txt')
     temp_array = pointFile.read().splitlines()
     for i in range(len(temp_array)):
@@ -50,7 +84,7 @@ def initializeVariablesFromFiles():
     pointFile.close()
 
     # Parsing planeDetail.txt to initialize plane detail arrays
-    print "Parsing planeDetails.txt ..."
+    #print "Parsing planeDetails.txt ..."
     planeDetails = open('planeDetails.txt')
     temp_array = planeDetails.read().splitlines()
     for i in range(len(temp_array)):
@@ -60,24 +94,35 @@ def initializeVariablesFromFiles():
         else:
             array_points_per_plane.append(int(temp_line[0]))
             array_plane_direction.append(str(temp_line[1]))
+            array_plane_description.append(str(temp_line[2]))
     planeDetails.close()
 
 # For all planes, perform homography
 def processImage(r_vector, t_vector, sequence_number):
-    print "Processing sequence" + str(sequence_number)
-    resultImg = np.zeros((picHeight ,picWidth))
+    print "Processing sequence " + str(sequence_number)
+    #resultImg = np.zeros((picHeight ,picWidth, 3))
+
+    skyImg = cv2.imread("sky.jpg", cv2.CV_LOAD_IMAGE_COLOR)
+    resultImg = skyImg
+
     num_planes = len(array_points_per_plane)
     # For all planes
     for i in range(num_planes):
         # Obtain plane detail for i-th plane
         numPoints = array_points_per_plane[i]
         planeDirection = array_plane_direction[i]
-        resultImg = performHomography(numPoints, planeDirection, resultImg, r_vector, t_vector)
+        planeDescription = array_plane_description[i]
+        if i == 0:
+            isGrass = True
+        else:
+            isGrass = False
+
+        resultImg = performHomography(numPoints, planeDirection, resultImg, r_vector, t_vector, planeDescription, isGrass)
     return resultImg
 
 # Given plane details, function will generate all possible 3d points and attach pixel color found through warped transformation
-def performHomography(numPoints, planeDirection, resultImg, r_vector, t_vector):
-    print "Performing homography for plane"
+def performHomography(numPoints, planeDirection, resultImg, r_vector, t_vector, planeDescription, isGrass):
+    #print "Performing homography for plane: " + planeDescription
     array_points_2d = array_2d_points_raw[:numPoints]
     array_points_3d = array_3d_points_raw[:numPoints]
     del array_2d_points_raw[:numPoints]
@@ -85,6 +130,10 @@ def performHomography(numPoints, planeDirection, resultImg, r_vector, t_vector):
 
     if len(array_points_2d) == 0 or len(array_points_3d) == 0:
         return resultImg
+
+    if isGrass == True:
+        array_points_3d[2][2] = t_vector[2] *-1
+        array_points_3d[3][2] = t_vector[2] *-1
 
     xStart = array_points_2d[0][0]
     xEnd = array_points_2d[1][0]
@@ -98,8 +147,8 @@ def performHomography(numPoints, planeDirection, resultImg, r_vector, t_vector):
     resultPoints = getProjectedPoints(np.array(array_points_3d, np.float32), r_vector, t_vector, camera, 0)
     warppedImage = warpHomo(np.array(array_points, np.float32), np.array(resultPoints, np.float32), (picWidth, picHeight ), tempImg)
 
-    duplicateImage = resultImg.copy()
-    resultImg = overlayImage(duplicateImage, warppedImage, resultPoints,planeDirection)
+    #duplicateImage = resultImg.copy()
+    resultImg = overlayImage(resultImg, warppedImage)
     return resultImg
 
 #Gets image pixels from xStart to xEnd -1, yStart to yEnd - 1
@@ -197,36 +246,32 @@ def overlayImage(resultImage, homoImage, resultPoints, planeDirection):
     resultImage = newResultImage + newHomoImage
     return resultImage
 
-# Extract and returns an area from picture with different parameters
-def getExtractedAreaFromCorners(pic, leftX, rightX, topY, bottomY):
-    extractedArea = pic[:, leftX:rightX]
-    extractedArea = extractedArea[topY:bottomY, :]
-    print extractedArea
+# Extract and returns an area from picture
+def getExtractedArea(pic, areaRadius, centerX, centerY):
+    extractedArea = pic[:, centerX-areaRadius:centerX+areaRadius]
+    extractedArea = extractedArea[centerY-areaRadius:centerY+areaRadius, :]
+
     return extractedArea
 
 # Fills in black colored holes with a selected color of pixel of furthest color distance
-def fillGapsAbsolute(fullPic, plane, relativeX, relativeY):
-    hsvPlane = cv2.cvtColor(plane, cv2.COLOR_BGR2HSV)
-    height = plane.shape[0]
-    width = plane.shape[1]
+def fillGapsAbsolute(picture, width, height):
+    hsvPic = cv2.cvtColor(picture, cv2.COLOR_BGR2HSV)
     for x in range (width):
-        for y in range (height):
-            actualPointX = x + relativeX
-            actualPointY = y + relativeY
-            bgrPoint = plane[y, x]
-            blue = int(bgrPoint[0])
-            green = int(bgrPoint[1])
-            red = int(bgrPoint[2])
+        for y in range (height):          
+            intensity = picture[y, x]
+            blue = int(intensity[0])
+            green = int(intensity[1])
+            red = int(intensity[2])
 
-            hsv = hsvPlane[y, x]
+            hsv = hsvPic[y, x]
             h = int(hsv[0])
             s = int(hsv[1])
             v = int(hsv[2])
             
             # if it is a hole
-            if (v <= 50):
-                print "Hole found at [", x, ", ", y, "]"
-                surroundingPixels = getExtractedArea(fullPic, 3, x, y)
+            if (v <= 30):
+                #print "Hole found at [", x, ", ", y, "]"
+                surroundingPixels = getExtractedArea(picture, 3, x, y)
                 spHeight = surroundingPixels.shape[0]
                 spWidth = surroundingPixels.shape[1]
 
@@ -236,68 +281,61 @@ def fillGapsAbsolute(fullPic, plane, relativeX, relativeY):
                 maxB = 0
                 for i in range (spWidth):
                     for j in range (spHeight):
-                        spBlue = int(surroundingPixels[j, i][2])
-                        spGreen = int(surroundingPixels[j, i][3])
-                        spRed = int(surroundingPixels[j, i][4])
-                        totalIntensity = (spBlue-blue)**2 + (spGreen-green)**2 + (spRed-red)**2
+                        spIntensity = surroundingPixels[j, i]
+                        totalIntensity = (int(spIntensity[0])-blue)**2 + (int(spIntensity[1])-green)**2 + (int(spIntensity[2])-red)**2
                         # Get color of max distance
                         if (totalIntensity > maxColorDistance):
                             maxColorDistance = totalIntensity
-                            maxB = spBlue
-                            maxG = spGreen
-                            maxR = spRed
+                            maxB = spIntensity[0]
+                            maxG = spIntensity[1]
+                            maxR = spIntensity[2]
 
                 #Fill in the hole
-                fullPic[actualPointY, actualPointX] = (maxB, maxG, maxR)
+                picture[y, x] = (maxB, maxG, maxR)
 
-# Fills large gaps with a selected color
-def floodFillLargeGaps(picture, width, height, color):
-    seedPoint = (0, 0)
-    mask = np.zeros((height+2, width+2), np.uint8)
-    cv2.floodFill(picture, mask, seedPoint, color, (6, 6, 6), (6, 6, 6))
+# Takes the average colour of surrounding pixels to paint black pixel holes 
+def generalBlender(picture, width, height):
+    hsvPic = cv2.cvtColor(picture, cv2.COLOR_BGR2HSV)
+    for x in range (width):
+        for y in range (height):
+            intensity = picture[y, x];
+            blue = intensity[0];
+            green = intensity[1];
+            red = intensity[2];
 
-def touchup(fullPic, rawPlanePoints):
-    green = (39, 92, 66)
-    blue = (227, 191, 145)
+            avgBlue = 0;
+            avgGreen = 0;
+            avgRed = 0;
+            numValidSP = 0;
 
-    topLeft = rawPlanePoints[0][0]
-    bottomRight = rawPlanePoints[len(rawPlanePoints) - 1][0]
-    tlX = int(topLeft[0])
-    tlY = int(topLeft[1])
-    brX = int(bottomRight[0])
-    brY = int(bottomRight[1])
+            hsv = hsvPic[y, x]
+            h = int(hsv[0])
+            s = int(hsv[1])
+            v = int(hsv[2])
 
-    minY = brY
-    maxY = tlY
-    trIndex = 0
-    blIndex = 0
+            # if it is a hole
+            if (v <= 30):
+                #print "Hole found at [", x, ", ", y, "]"
+                surroundingPixels = getExtractedArea(picture, 3, x, y)
+                spHeight = surroundingPixels.shape[0]
+                spWidth = surroundingPixels.shape[1]
+                for i in range (spWidth):
+                    for j in range (spHeight):
+                        spIntensity = surroundingPixels[j, i];
+                        if (i != x and j != y and spIntensity[0] > 50 and spIntensity[1] > 50 and spIntensity[2] > 50):
+                            avgBlue += spIntensity[0]
+                            avgGreen += spIntensity[1]
+                            avgRed += spIntensity[2]
+                            numValidSP += 1
+                if (numValidSP > 0):
+                    avgBlue /= numValidSP
+                    avgGreen /= numValidSP
+                    avgRed /= numValidSP
 
-    # Find other two corners
-    # Assumes vertical gradients are always perpendicular to XZ plane
-    for i in range(1, len(rawPlanePoints)-1):
-        if (int(rawPlanePoints[i][0][0]) == brX and int(rawPlanePoints[i][0][1]) < minY):
-            minY = rawPlanePoints[i][0][1]
-            trIndex = i
-        elif (int(rawPlanePoints[i][0][0]) == tlX and int(rawPlanePoints[i][0][1]) > maxY):
-            maxY = rawPlanePoints[i][0][1]
-            blIndex = i
-    topRight = rawPlanePoints[trIndex][0]
-    bottomLeft = rawPlanePoints[blIndex][0]
+                #Fill in the hole
+                picture[y, x] = (avgBlue, avgGreen, avgRed)
 
-    #print topLeft, topRight, bottomRight, bottomLeft
-
-    # If left side longer than right side
-    if (int(bottomLeft[1]) - tlY > brY - int(topRight[1])):
-        topY = tlY
-        bottomY = bottomLeft[1]
-    else:
-        topY = int(topRight[1])
-        bottomY = brY
-
-    #print tlX, int(topRight[0]), topY, bottomY
-    planeToFill = getExtractedAreaFromCorners(fullPic, tlX, int(topRight[0]), topY, bottomY)
-
-    # Do actual touchup 
-    fillGapsAbsolute(fullPic, planeToFill, tlX, tlY)
+def deNoise(image):
+    cv2.fastNlMeansDenoisingColored(image, None, 10, 10, 7, 21) 
     
 main()
